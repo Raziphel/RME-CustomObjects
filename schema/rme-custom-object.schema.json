@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RME Custom Object",
+  "type": "object",
+  "required": ["RootObjectId", "Blocks"],
+  "properties": {
+    "FormatVersion": { "type": "integer", "minimum": 1 },
+    "Id": { "type": "string" },
+    "Description": { "type": "string" },
+    "RootObjectId": { "type": "integer" },
+    "Blocks": {
+      "type": "array", "maxItems": 50000,
+      "items": { "$ref": "#/$defs/block" }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "oneOf": [
+        { "type": "object", "required": ["x", "y", "z"], "properties": { "x": {"type":"number"}, "y": {"type":"number"}, "z": {"type":"number"} } },
+        { "type": "array", "prefixItems": [{"type":"number"},{"type":"number"},{"type":"number"}], "minItems": 3, "maxItems": 3 }
+      ]
+    },
+    "block": {
+      "type": "object",
+      "required": ["ObjectId", "ParentId", "Position", "Rotation", "Scale", "BlockType"],
+      "properties": {
+        "Name": { "type": "string" }, "ObjectId": { "type": "integer" }, "ParentId": { "type": "integer" },
+        "AnimatorName": { "type": ["string", "null"] }, "Position": { "$ref": "#/$defs/vector" },
+        "Rotation": { "$ref": "#/$defs/vector" }, "Scale": { "$ref": "#/$defs/vector" },
+        "BlockType": { "type": "integer", "minimum": 0, "maximum": 12 }, "Properties": { "type": "object" }
+      }
+    }
+  }
+}

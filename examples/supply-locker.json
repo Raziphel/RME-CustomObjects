@@ -1,0 +1,10 @@
+{
+  "FormatVersion": 1,
+  "Id": "supply-locker",
+  "Description": "A locker and workstation grouped beneath one reusable root.",
+  "RootObjectId": 0,
+  "Blocks": [
+    { "Name": "Locker", "ObjectId": 1, "ParentId": 0, "Position": {"x":0,"y":0,"z":0}, "Rotation": {"x":0,"y":0,"z":0}, "Scale": {"x":1,"y":1,"z":1}, "BlockType": 7, "Properties": {"LockerType":2,"Chance":100,"OpenedChambers":0,"KeycardPermissions":0} },
+    { "Name": "Workstation", "ObjectId": 2, "ParentId": 0, "Position": {"x":1.5,"y":0,"z":0}, "Rotation": {"x":0,"y":90,"z":0}, "Scale": {"x":1,"y":1,"z":1}, "BlockType": 4, "Properties": {"IsInteractable":true} }
+  ]
+}
