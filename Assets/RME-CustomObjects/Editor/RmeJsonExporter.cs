@@ -13,6 +13,10 @@ namespace RazisRealm.RmeCustomObjects.Editor
         {
             RmeObjectBlock[] blocks = root.GetComponentsInChildren<RmeObjectBlock>(true)
                 .Where(value => value.gameObject.name != RmePreviewFactory.PreviewName).ToArray();
+            if (blocks.Length == 0)
+                throw new InvalidOperationException("The custom object is empty. Add at least one primitive or SCP:SL prefab before exporting.");
+            if (root.transform.localScale != Vector3.one)
+                throw new InvalidOperationException("The custom-object root must keep scale 1,1,1. Scale its child blocks instead.");
             var ids = new Dictionary<Transform, int> { [root.transform] = 0 };
             int nextId = 1;
             foreach (RmeObjectBlock block in blocks) ids[block.transform] = nextId++;
@@ -23,6 +27,9 @@ namespace RazisRealm.RmeCustomObjects.Editor
             for (int i = 0; i < blocks.Length; i++)
             {
                 RmeObjectBlock block = blocks[i];
+                Vector3 scale = block.transform.localScale;
+                if (!Finite(block.transform.localPosition) || !Finite(block.transform.localEulerAngles) || !Finite(scale))
+                    throw new InvalidOperationException($"Block '{block.name}' has an invalid transform.");
                 Transform parent = block.transform.parent;
                 while (parent != null && !ids.ContainsKey(parent)) parent = parent.parent;
                 if (parent == null) throw new InvalidOperationException($"Block '{block.name}' is outside the custom-object hierarchy.");
@@ -75,6 +82,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
         }
 
         private static string V(Vector3 value) => $"{{\"x\":{F(value.x)},\"y\":{F(value.y)},\"z\":{F(value.z)}}}";
+        private static bool Finite(Vector3 value) => !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
+            !float.IsNaN(value.y) && !float.IsInfinity(value.y) && !float.IsNaN(value.z) && !float.IsInfinity(value.z);
         private static string F(float value) => value.ToString("R", CultureInfo.InvariantCulture);
         private static string B(bool value) => value ? "true" : "false";
         private static string Q(string value) => "\"" + (value ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n") + "\"";

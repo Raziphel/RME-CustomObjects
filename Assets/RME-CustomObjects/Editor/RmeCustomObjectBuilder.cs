@@ -42,7 +42,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private void OnGUI()
         {
             EditorGUILayout.LabelField("Razi's Realm Custom Objects", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Create a root, add blocks beneath it, arrange them in the Scene, then export.", MessageType.Info);
+            RmeCustomObjectRoot activeRoot = FindRoot();
+            EditorGUILayout.HelpBox(activeRoot == null
+                ? "Start by creating a custom-object root."
+                : $"Editing: {activeRoot.ObjectName}  •  {activeRoot.GetComponentsInChildren<RmeObjectBlock>(true).Length} blocks",
+                activeRoot == null ? MessageType.Warning : MessageType.Info);
             if (GUILayout.Button("Create Custom Object Root")) CreateRoot();
 
             EditorGUILayout.Space();
@@ -80,10 +84,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Locker")) AddSimple("Locker", RmeBlockKind.Locker);
-                if (GUILayout.Button("Door")) AddSimple("Door", RmeBlockKind.Door);
-                if (GUILayout.Button("Interactable")) AddSimple("Interactable", RmeBlockKind.Interactable);
+                if (GUILayout.Button("Interaction Trigger")) AddSimple("Interaction Trigger", RmeBlockKind.Interactable);
                 EditorGUILayout.EndHorizontal();
             }
+
+            EditorGUILayout.HelpBox("Doors are placed from the searchable SCP:SL Prefab list above. Search for 'door' and choose the exact LCZ, HCZ, EZ, or Bulk Door visual. Interaction Trigger is an invisible click/hold region—not a door.", MessageType.None);
 
             EditorGUILayout.Space();
             using (new EditorGUI.DisabledScope(FindRoot() == null))
@@ -164,7 +169,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 string json = RmeJsonExporter.Export(root);
                 File.WriteAllText(path, json, new UTF8Encoding(false));
                 EditorUtility.RevealInFinder(path);
-                EditorUtility.DisplayDialog("RME Custom Objects", $"Exported {root.ObjectName}\n\n{path}", "Done");
+                EditorUtility.DisplayDialog("RME Custom Object exported",
+                    $"Exported {root.ObjectName}\n\n{path}\n\nNext: copy this JSON into the server's RME CustomObjects folder, run 'rme custom reload', then place/reference '{safeName}' in the RME map.", "Done");
                 Debug.Log($"[RME Custom Objects] Exported {root.ObjectName} to {path}");
             }
             catch (Exception exception) { Debug.LogError("[RME Custom Objects] Export failed: " + exception.Message); }

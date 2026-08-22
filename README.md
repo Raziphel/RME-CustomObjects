@@ -10,6 +10,8 @@ If Unity Hub displays “Editor version not installed,” use its **Install Edit
 
 After scripts compile, the **RME Builder** window opens automatically and creates a `NewCustomObject` root. Reopen it any time from **RME Custom Objects → Open Builder**. Select the root or one of its children, add primitives or SCP:SL prefabs, arrange and nest them normally in the Scene, edit block properties in the Inspector, and click **Export Selected Custom Object**.
 
+Doors have one workflow: search `door` in the SCP:SL prefab browser and select the exact visual you want. Do not add an Interaction Trigger for a door—the real network door supplies its own interaction. Interaction Trigger is only for invisible custom click/hold volumes.
+
 Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes and scripts are not redistributable as a complete Unity package. The exported block stores the exact network-prefab name; RealmPlugin replaces that proxy with the genuine interactive server prefab when the RME map loads.
 
 The `Assets/RME-CustomObjects/Prefabs/RRP` folder contains all 26 prefab descriptors from the supplied `RRP.zip`. The builder searches and instantiates those real assets first. If Unity cannot resolve a prefab's external game mesh/material GUIDs, it automatically shows a clearly shaped fallback preview instead of creating an invisible or broken scene object. Either preview exports the same exact interactive server-prefab name.
