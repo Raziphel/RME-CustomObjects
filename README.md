@@ -8,6 +8,10 @@ This repository is also a Unity project. Install **Unity 2021.3.17f1** in Unity 
 
 If Unity Hub displays “Editor version not installed,” use its **Install Editor** button for `2021.3.17f1`. No platform build-support module is required just to author/export objects. Unity creates `Library`, `Logs`, and other ignored local folders during the first import.
 
+After scripts compile, the **RME Builder** window opens automatically and creates a `NewCustomObject` root. Reopen it any time from **RME Custom Objects → Open Builder**. Select the root or one of its children, add primitives or SCP:SL prefabs, arrange and nest them normally in the Scene, edit block properties in the Inspector, and click **Export Selected Custom Object**.
+
+Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes and scripts are not redistributable as a complete Unity package. The exported block stores the exact network-prefab name; RealmPlugin replaces that proxy with the genuine interactive server prefab when the RME map loads.
+
 ## Install and use
 
 1. Copy a completed `<name>.json` (plus optional `<name>-Rigidbodies.json`, `<name>-Teleports.json`, and animator bundles) into the server's RME `CustomObjects/<name>/` directory.
