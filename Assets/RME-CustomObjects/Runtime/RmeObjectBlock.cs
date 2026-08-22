@@ -9,6 +9,14 @@ namespace RazisRealm.RmeCustomObjects
         Waypoint = 10, Door = 11, Prefab = 12
     }
 
+    public enum RmeLightType
+    {
+        Spot = 0, Directional = 1, Point = 2, Rectangle = 3, Disc = 4,
+        Pyramid = 5, Box = 6, Tube = 7
+    }
+
+    public enum RmeLightShape { Cone = 0, Pyramid = 1, Box = 2 }
+
     [DisallowMultipleComponent]
     public sealed class RmeObjectBlock : MonoBehaviour
     {
@@ -27,8 +35,8 @@ namespace RazisRealm.RmeCustomObjects
         public bool RequireAll = true;
         public float LightIntensity = 1f;
         public float LightRange = 10f;
-        public LightType LightType = LightType.Point;
-        public LightShape LightShape = LightShape.Cone;
+        public RmeLightType LightType = RmeLightType.Point;
+        public RmeLightShape LightShape = RmeLightShape.Cone;
         public LightShadows LightShadows = LightShadows.None;
         [Range(0f, 1f)] public float LightShadowStrength = 1f;
         [Range(0f, 179f)] public float SpotAngle = 30f;
