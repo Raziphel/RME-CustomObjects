@@ -74,11 +74,28 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (visible.Length == 0) EditorGUILayout.HelpBox("No prefab names match that search.", MessageType.Warning);
 
             EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Lights", EditorStyles.boldLabel);
+            using (new EditorGUI.DisabledScope(FindRoot() == null))
+            {
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Point")) AddLight("Point Light", LightType.Point, LightShape.Cone);
+                if (GUILayout.Button("Spot Cone")) AddLight("Spot Cone Light", LightType.Spot, LightShape.Cone);
+                if (GUILayout.Button("Spot Pyramid")) AddLight("Spot Pyramid Light", LightType.Pyramid, LightShape.Pyramid);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Spot Box")) AddLight("Spot Box Light", LightType.Box, LightShape.Box);
+                if (GUILayout.Button("Directional")) AddLight("Directional Light", LightType.Directional, LightShape.Cone);
+                if (GUILayout.Button("Rectangle")) AddLight("Rectangle Light", LightType.Rectangle, LightShape.Cone);
+                if (GUILayout.Button("Disc")) AddLight("Disc Light", LightType.Disc, LightShape.Cone);
+                if (GUILayout.Button("Tube")) AddLight("Tube Light", LightType.Tube, LightShape.Cone);
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField("Interactive blocks", EditorStyles.boldLabel);
             using (new EditorGUI.DisabledScope(FindRoot() == null))
             {
                 EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("Light")) AddSimple("Light", RmeBlockKind.Light);
                 if (GUILayout.Button("Pickup")) AddSimple("Pickup", RmeBlockKind.Pickup);
                 if (GUILayout.Button("Workstation")) AddSimple("Workstation", RmeBlockKind.Workstation);
                 EditorGUILayout.EndHorizontal();
@@ -154,6 +171,16 @@ namespace RazisRealm.RmeCustomObjects.Editor
         {
             GameObject value = NewBlock(name, kind);
             if (value != null) RmePreviewFactory.Rebuild(value.GetComponent<RmeObjectBlock>());
+        }
+
+        private static void AddLight(string name, LightType type, LightShape shape)
+        {
+            GameObject value = NewBlock(name, RmeBlockKind.Light);
+            if (value == null) return;
+            RmeObjectBlock block = value.GetComponent<RmeObjectBlock>();
+            block.LightType = type;
+            block.LightShape = shape;
+            RmePreviewFactory.Rebuild(block);
         }
 
         private static void ExportSelected()

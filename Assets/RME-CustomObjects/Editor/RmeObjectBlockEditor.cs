@@ -35,9 +35,21 @@ namespace RazisRealm.RmeCustomObjects.Editor
             }
             if (kind == RmeBlockKind.Light)
             {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("LightType"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("LightShape"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("Color"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("LightIntensity"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("LightRange"));
+                LightType type = (LightType)serializedObject.FindProperty("LightType").intValue;
+                if (type == LightType.Spot || type == LightType.Pyramid || type == LightType.Box)
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("SpotAngle"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("InnerSpotAngle"));
+                }
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("LightShadows"));
+                if ((LightShadows)serializedObject.FindProperty("LightShadows").intValue != LightShadows.None)
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("LightShadowStrength"));
+                EditorGUILayout.HelpBox("This uses Unity's real Light component, so its color, cone/shape, range, intensity, and shadows preview like MER. RME exports the same values used in-game.", MessageType.Info);
             }
             if (kind == RmeBlockKind.Door || kind == RmeBlockKind.Prefab)
             {

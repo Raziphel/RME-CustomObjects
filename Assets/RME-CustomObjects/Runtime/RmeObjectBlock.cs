@@ -27,6 +27,12 @@ namespace RazisRealm.RmeCustomObjects
         public bool RequireAll = true;
         public float LightIntensity = 1f;
         public float LightRange = 10f;
+        public LightType LightType = LightType.Point;
+        public LightShape LightShape = LightShape.Cone;
+        public LightShadows LightShadows = LightShadows.None;
+        [Range(0f, 1f)] public float LightShadowStrength = 1f;
+        [Range(0f, 179f)] public float SpotAngle = 30f;
+        [Range(0f, 179f)] public float InnerSpotAngle = 21.80208f;
         [TextArea] public string Text;
         public string NestedObjectName;
     }

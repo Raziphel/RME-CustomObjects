@@ -57,7 +57,15 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 case RmeBlockKind.Primitive:
                     Add("PrimitiveType", ((int)block.PrimitiveType).ToString()); Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("PrimitiveFlags", "3"); break;
                 case RmeBlockKind.Light:
-                    Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("Intensity", F(block.LightIntensity)); Add("Range", F(block.LightRange)); Add("LightType", "2"); break;
+                    Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color)));
+                    Add("Intensity", F(Mathf.Clamp(block.LightIntensity, 0f, 100f)));
+                    Add("Range", F(Mathf.Clamp(block.LightRange, 0f, 500f)));
+                    Add("LightType", ((int)block.LightType).ToString());
+                    Add("ShadowType", ((int)block.LightShadows).ToString());
+                    Add("Shape", ((int)block.LightShape).ToString());
+                    Add("SpotAngle", F(Mathf.Clamp(block.SpotAngle, 0f, 179f)));
+                    Add("InnerSpotAngle", F(Mathf.Clamp(block.InnerSpotAngle, 0f, block.SpotAngle)));
+                    Add("ShadowStrength", F(Mathf.Clamp01(block.LightShadowStrength))); break;
                 case RmeBlockKind.Pickup:
                     Add("ItemType", block.ItemType.ToString()); Add("Chance", F(block.Chance)); Add("Locked", B(block.IsLocked)); break;
                 case RmeBlockKind.Workstation: Add("IsInteractable", B(block.IsInteractable)); break;

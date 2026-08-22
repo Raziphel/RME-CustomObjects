@@ -15,7 +15,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (existing != null) Object.DestroyImmediate(existing.gameObject);
             GameObject preview = block.Kind switch
             {
-                RmeBlockKind.Light => Sphere("Light preview", new Vector3(.25f, .25f, .25f), new Color(1f, .9f, .25f)),
+                RmeBlockKind.Light => LightPreview(block),
                 RmeBlockKind.Pickup => Box("Pickup preview", new Vector3(.3f, .12f, .5f), new Color(.25f, .7f, 1f)),
                 RmeBlockKind.Workstation => Box("Workstation preview", new Vector3(1.2f, 1.5f, .7f), new Color(.25f, .45f, .65f)),
                 RmeBlockKind.Locker => Box("Locker preview", new Vector3(1.8f, 2.1f, .65f), new Color(.35f, .4f, .45f)),
@@ -29,6 +29,23 @@ namespace RazisRealm.RmeCustomObjects.Editor
             preview.hideFlags = HideFlags.NotEditable;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
             EditorUtility.SetDirty(block.gameObject);
+        }
+
+        private static GameObject LightPreview(RmeObjectBlock block)
+        {
+            var value = new GameObject("Light preview");
+            Light light = value.AddComponent<Light>();
+            light.type = block.LightType;
+            light.shape = block.LightShape;
+            light.color = block.Color;
+            light.intensity = Mathf.Max(0f, block.LightIntensity);
+            light.range = Mathf.Max(0f, block.LightRange);
+            light.spotAngle = Mathf.Clamp(block.SpotAngle, 0f, 179f);
+            light.innerSpotAngle = Mathf.Clamp(block.InnerSpotAngle, 0f, light.spotAngle);
+            light.shadows = block.LightShadows;
+            light.shadowStrength = Mathf.Clamp01(block.LightShadowStrength);
+            light.areaSize = Vector2.one;
+            return value;
         }
 
         private static GameObject ImportedPrefab(string name)
