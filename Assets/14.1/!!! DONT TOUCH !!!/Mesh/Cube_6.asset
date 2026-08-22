@@ -7,7 +7,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Cube
+  m_Name: Cube_6
   m_SubMeshes:
   - serializedVersion: 2
     firstByte: 0

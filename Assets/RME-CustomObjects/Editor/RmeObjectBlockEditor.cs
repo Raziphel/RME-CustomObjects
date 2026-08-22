@@ -36,12 +36,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (kind == RmeBlockKind.Light)
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("LightType"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("LightShape"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("Color"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("LightIntensity"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("LightRange"));
                 RmeLightType type = (RmeLightType)serializedObject.FindProperty("LightType").intValue;
-                if (type == RmeLightType.Spot || type == RmeLightType.Pyramid || type == RmeLightType.Box)
+                if (type == RmeLightType.Spot)
                 {
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("SpotAngle"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("InnerSpotAngle"));

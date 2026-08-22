@@ -11,11 +11,10 @@ namespace RazisRealm.RmeCustomObjects
 
     public enum RmeLightType
     {
-        Spot = 0, Directional = 1, Point = 2, Rectangle = 3, Disc = 4,
-        Pyramid = 5, Box = 6, Tube = 7
+        Spot = 0, Directional = 1, Point = 2, Rectangle = 3, Disc = 4
     }
 
-    public enum RmeLightShape { Cone = 0, Pyramid = 1, Box = 2 }
+    public enum RmeLightShape { Cone = 0 }
 
     [DisallowMultipleComponent]
     public sealed class RmeObjectBlock : MonoBehaviour

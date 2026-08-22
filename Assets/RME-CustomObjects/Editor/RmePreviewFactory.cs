@@ -35,8 +35,14 @@ namespace RazisRealm.RmeCustomObjects.Editor
         {
             var value = new GameObject("Light preview");
             Light light = value.AddComponent<Light>();
+            int serializedType = (int)block.LightType;
+            if (serializedType < (int)RmeLightType.Spot || serializedType > (int)RmeLightType.Disc)
+            {
+                block.LightType = RmeLightType.Point;
+                block.LightShape = RmeLightShape.Cone;
+                EditorUtility.SetDirty(block);
+            }
             light.type = (LightType)(int)block.LightType;
-            light.shape = (LightShape)(int)block.LightShape;
             light.color = block.Color;
             light.intensity = Mathf.Max(0f, block.LightIntensity);
             light.range = Mathf.Max(0f, block.LightRange);

@@ -79,15 +79,12 @@ namespace RazisRealm.RmeCustomObjects.Editor
             {
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Point")) AddLight("Point Light", RmeLightType.Point, RmeLightShape.Cone);
-                if (GUILayout.Button("Spot Cone")) AddLight("Spot Cone Light", RmeLightType.Spot, RmeLightShape.Cone);
-                if (GUILayout.Button("Spot Pyramid")) AddLight("Spot Pyramid Light", RmeLightType.Pyramid, RmeLightShape.Pyramid);
+                if (GUILayout.Button("Spot")) AddLight("Spot Light", RmeLightType.Spot, RmeLightShape.Cone);
+                if (GUILayout.Button("Directional")) AddLight("Directional Light", RmeLightType.Directional, RmeLightShape.Cone);
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("Spot Box")) AddLight("Spot Box Light", RmeLightType.Box, RmeLightShape.Box);
-                if (GUILayout.Button("Directional")) AddLight("Directional Light", RmeLightType.Directional, RmeLightShape.Cone);
                 if (GUILayout.Button("Rectangle")) AddLight("Rectangle Light", RmeLightType.Rectangle, RmeLightShape.Cone);
                 if (GUILayout.Button("Disc")) AddLight("Disc Light", RmeLightType.Disc, RmeLightShape.Cone);
-                if (GUILayout.Button("Tube")) AddLight("Tube Light", RmeLightType.Tube, RmeLightShape.Cone);
                 EditorGUILayout.EndHorizontal();
             }
 
