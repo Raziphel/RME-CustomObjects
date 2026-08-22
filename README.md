@@ -9,6 +9,14 @@ A standalone authoring kit for reusable Realm Map Editor objects. It uses the fa
 3. Run `python3 tools/validate.py path/to/<name>.json` before handing the object to a server owner.
 4. Use `rme prefabs` in-game to obtain exact names for block type `12`.
 
+The included `catalog/prefabs.json` lists the 26 SCP:SL prefab names recovered from the RRP Unity reference set. Generate a correctly formed generic-prefab block with:
+
+```bash
+python3 tools/new_prefab.py "GeneratorStructure" --id 12 --parent 0
+```
+
+The supplied `.prefab` files are Unity YAML descriptors rather than portable models. They reference external SCP:SL scripts, meshes, materials, and animations, so importing those files into an unrelated Unity project produces missing-script/missing-asset objects. Use them only inside the matching SCP:SL Unity reference project. RME itself uses the exact catalog name to spawn the server's registered network prefab and does not load Unity `.prefab` files.
+
 Existing ProjectMER block types remain compatible. RME extensions are generic prefab (`12`), text (`8`), interactable (`9`), waypoint (`10`), and typed door (`11`). Teleports use the established `<name>-Teleports.json` sidecar.
 
 ## Block types
