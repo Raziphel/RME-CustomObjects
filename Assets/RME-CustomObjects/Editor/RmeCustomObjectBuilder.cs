@@ -25,6 +25,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
 
         private int _prefabIndex;
         private PrimitiveType _primitive = PrimitiveType.Cube;
+        private string _search = "";
+        private Vector2 _prefabScroll;
 
         [MenuItem("RME Custom Objects/Open Builder %#r")]
         public static void Open() => GetWindow<RmeCustomObjectBuilder>("RME Builder");
@@ -52,9 +54,15 @@ namespace RazisRealm.RmeCustomObjects.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("SCP:SL Prefab", EditorStyles.boldLabel);
-            _prefabIndex = EditorGUILayout.Popup("Prefab", _prefabIndex, KnownPrefabs);
+            _search = EditorGUILayout.TextField("Search", _search);
+            string[] visible = KnownPrefabs.Where(value => string.IsNullOrWhiteSpace(_search) ||
+                value.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0).ToArray();
+            _prefabScroll = EditorGUILayout.BeginScrollView(_prefabScroll, GUILayout.Height(150));
             using (new EditorGUI.DisabledScope(FindRoot() == null))
-                if (GUILayout.Button("Add Prefab")) AddPrefab(KnownPrefabs[_prefabIndex]);
+                foreach (string prefab in visible)
+                    if (GUILayout.Button($"{Category(prefab)}  {prefab}", EditorStyles.miniButton)) AddPrefab(prefab);
+            EditorGUILayout.EndScrollView();
+            if (visible.Length == 0) EditorGUILayout.HelpBox("No prefab names match that search.", MessageType.Warning);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Interactive blocks", EditorStyles.boldLabel);
@@ -74,7 +82,10 @@ namespace RazisRealm.RmeCustomObjects.Editor
 
             EditorGUILayout.Space();
             using (new EditorGUI.DisabledScope(FindRoot() == null))
+            {
+                if (GUILayout.Button("Validate Selected Custom Object")) ValidateSelected();
                 if (GUILayout.Button("Export Selected Custom Object", GUILayout.Height(32))) ExportSelected();
+            }
         }
 
         private static RmeCustomObjectRoot FindRoot()
@@ -104,6 +115,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             value.AddComponent<RmeObjectBlock>().Kind = kind;
             Undo.RegisterCreatedObjectUndo(value, "Add RME block");
             Selection.activeGameObject = value;
+            SceneView.lastActiveSceneView?.FrameSelected();
             return value;
         }
 
@@ -117,6 +129,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             block.PrimitiveType = type;
             Undo.RegisterCreatedObjectUndo(value, "Add RME primitive");
             Selection.activeGameObject = value;
+            SceneView.lastActiveSceneView?.FrameSelected();
         }
 
         private static void AddPrefab(string prefabName)
@@ -146,9 +159,34 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 string json = RmeJsonExporter.Export(root);
                 File.WriteAllText(path, json, new UTF8Encoding(false));
                 EditorUtility.RevealInFinder(path);
+                EditorUtility.DisplayDialog("RME Custom Objects", $"Exported {root.ObjectName}\n\n{path}", "Done");
                 Debug.Log($"[RME Custom Objects] Exported {root.ObjectName} to {path}");
             }
             catch (Exception exception) { Debug.LogError("[RME Custom Objects] Export failed: " + exception.Message); }
+        }
+
+        private static void ValidateSelected()
+        {
+            RmeCustomObjectRoot root = FindRoot();
+            try
+            {
+                string json = RmeJsonExporter.Export(root);
+                int blocks = root.GetComponentsInChildren<RmeObjectBlock>(true).Length;
+                EditorUtility.DisplayDialog("RME validation passed", $"{root.ObjectName}\n{blocks} exportable blocks\n{json.Length:N0} JSON characters", "OK");
+            }
+            catch (Exception exception) { EditorUtility.DisplayDialog("RME validation failed", exception.Message, "Fix it"); }
+        }
+
+        private static string Category(string name)
+        {
+            string value = name.ToLowerInvariant();
+            if (value.Contains("locker") || value.Contains("rack") || value.Contains("medkit") || value.Contains("pedestal")) return "LOCKER";
+            if (value.Contains("door")) return "DOOR";
+            if (value.Contains("camera")) return "CAMERA";
+            if (value.Contains("target")) return "TARGET";
+            if (value.Contains("capybara")) return "TOY";
+            if (value.Contains("work") || value.Contains("generator")) return "INTERACTIVE";
+            return "FACILITY";
         }
     }
 

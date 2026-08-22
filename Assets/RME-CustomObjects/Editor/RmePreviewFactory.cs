@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 RmeBlockKind.Locker => Box("Locker preview", new Vector3(1.8f, 2.1f, .65f), new Color(.35f, .4f, .45f)),
                 RmeBlockKind.Door => Box("Door preview", new Vector3(2.3f, 2.8f, .18f), new Color(.25f, .3f, .35f)),
                 RmeBlockKind.Interactable => Box("Interactable preview", Vector3.one, new Color(.8f, .35f, .85f, .45f)),
-                RmeBlockKind.Prefab => PrefabProxy(block.PrefabName),
+                RmeBlockKind.Prefab => ImportedPrefab(block.PrefabName) ?? PrefabProxy(block.PrefabName),
                 _ => Box("Block preview", Vector3.one, Color.gray)
             };
             preview.name = PreviewName;
@@ -28,6 +29,26 @@ namespace RazisRealm.RmeCustomObjects.Editor
             preview.hideFlags = HideFlags.NotEditable;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
             EditorUtility.SetDirty(block.gameObject);
+        }
+
+        private static GameObject ImportedPrefab(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            string[] matches = AssetDatabase.FindAssets($"{name} t:Prefab",
+                new[] { "Assets/RME-CustomObjects/Prefabs/RRP" });
+            foreach (string match in matches)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(match);
+                GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (asset == null || !asset.name.Equals(name, System.StringComparison.OrdinalIgnoreCase)) continue;
+                GameObject instance = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+                if (instance == null) continue;
+                bool hasGeometry = instance.GetComponentsInChildren<MeshFilter>(true).Any(value => value.sharedMesh != null) ||
+                    instance.GetComponentsInChildren<SkinnedMeshRenderer>(true).Any(value => value.sharedMesh != null);
+                if (hasGeometry) return instance;
+                Object.DestroyImmediate(instance);
+            }
+            return null;
         }
 
         private static GameObject PrefabProxy(string name)
