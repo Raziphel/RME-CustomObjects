@@ -2,6 +2,12 @@
 
 A standalone authoring kit for reusable Realm Map Editor objects. It uses the familiar ProjectMER/SL-CustomObjects block format, while adding strict validation and generic SCP:SL network-prefab placement.
 
+## Open in Unity
+
+This repository is also a Unity project. Install **Unity 2021.3.17f1** in Unity Hub, choose **Add project from disk**, and select this `RME-CustomObjects` folder—the folder containing `Assets`, `Packages`, and `ProjectSettings`. Do not select the `Assets` folder itself.
+
+If Unity Hub displays “Editor version not installed,” use its **Install Editor** button for `2021.3.17f1`. No platform build-support module is required just to author/export objects. Unity creates `Library`, `Logs`, and other ignored local folders during the first import.
+
 ## Install and use
 
 1. Copy a completed `<name>.json` (plus optional `<name>-Rigidbodies.json`, `<name>-Teleports.json`, and animator bundles) into the server's RME `CustomObjects/<name>/` directory.
