@@ -23,7 +23,6 @@ namespace RazisRealm.RmeCustomObjects.Editor
             "Tank-Supported Shelf Open Connector"
         };
 
-        private int _prefabIndex;
         private PrimitiveType _primitive = PrimitiveType.Cube;
         private string _search = "";
         private Vector2 _prefabScroll;
@@ -60,7 +59,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
             _prefabScroll = EditorGUILayout.BeginScrollView(_prefabScroll, GUILayout.Height(150));
             using (new EditorGUI.DisabledScope(FindRoot() == null))
                 foreach (string prefab in visible)
-                    if (GUILayout.Button($"{Category(prefab)}  {prefab}", EditorStyles.miniButton)) AddPrefab(prefab);
+                {
+                    GameObject asset = RmePreviewFactory.FindImportedAsset(prefab);
+                    Texture image = asset == null ? null : AssetPreview.GetAssetPreview(asset) ?? AssetPreview.GetMiniThumbnail(asset);
+                    var content = new GUIContent($"  {prefab}\n  {Category(prefab)}", image,
+                        "Click to place this SCP:SL prefab under the selected object");
+                    if (GUILayout.Button(content, GUILayout.Height(48))) AddPrefab(prefab);
+                }
             EditorGUILayout.EndScrollView();
             if (visible.Length == 0) EditorGUILayout.HelpBox("No prefab names match that search.", MessageType.Warning);
 

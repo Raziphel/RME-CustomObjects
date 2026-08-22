@@ -33,6 +33,19 @@ namespace RazisRealm.RmeCustomObjects.Editor
 
         private static GameObject ImportedPrefab(string name)
         {
+            GameObject asset = FindImportedAsset(name);
+            if (asset == null) return null;
+            GameObject instance = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            if (instance == null) return null;
+            bool hasGeometry = instance.GetComponentsInChildren<MeshFilter>(true).Any(value => value.sharedMesh != null) ||
+                instance.GetComponentsInChildren<SkinnedMeshRenderer>(true).Any(value => value.sharedMesh != null);
+            if (hasGeometry) return instance;
+            Object.DestroyImmediate(instance);
+            return null;
+        }
+
+        internal static GameObject FindImportedAsset(string name)
+        {
             if (string.IsNullOrWhiteSpace(name)) return null;
             string[] matches = AssetDatabase.FindAssets($"{name} t:Prefab",
                 new[] { "Assets/RME-CustomObjects/Prefabs/RRP" });
@@ -40,13 +53,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             {
                 string path = AssetDatabase.GUIDToAssetPath(match);
                 GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (asset == null || !asset.name.Equals(name, System.StringComparison.OrdinalIgnoreCase)) continue;
-                GameObject instance = PrefabUtility.InstantiatePrefab(asset) as GameObject;
-                if (instance == null) continue;
-                bool hasGeometry = instance.GetComponentsInChildren<MeshFilter>(true).Any(value => value.sharedMesh != null) ||
-                    instance.GetComponentsInChildren<SkinnedMeshRenderer>(true).Any(value => value.sharedMesh != null);
-                if (hasGeometry) return instance;
-                Object.DestroyImmediate(instance);
+                if (asset != null && asset.name.Equals(name, System.StringComparison.OrdinalIgnoreCase)) return asset;
             }
             return null;
         }

@@ -14,6 +14,8 @@ Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes an
 
 The `Assets/RME-CustomObjects/Prefabs/RRP` folder contains all 26 prefab descriptors from the supplied `RRP.zip`. The builder searches and instantiates those real assets first. If Unity cannot resolve a prefab's external game mesh/material GUIDs, it automatically shows a clearly shaped fallback preview instead of creating an invisible or broken scene object. Either preview exports the same exact interactive server-prefab name.
 
+The required visual dependencies from `SCPSL 14.1 - Rooms.unitypackage` are included selectively under `Assets/14.1` and `Assets/Room Reference`: 236 of the RRP files' 322 direct GUID references plus 153 transitive mesh/material/texture/shader dependencies. The unrelated multi-gigabyte room library is intentionally excluded. Most remaining references are game-only scripts, audio, controllers, built-in resources, and some secondary meshes that were not present in the supplied package. The builder therefore checks whether usable geometry imported and keeps its safe-preview fallback. RealmPlugin supplies the real behavior in-game.
+
 ## Install and use
 
 1. Copy a completed `<name>.json` (plus optional `<name>-Rigidbodies.json`, `<name>-Teleports.json`, and animator bundles) into the server's RME `CustomObjects/<name>/` directory.
