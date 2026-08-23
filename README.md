@@ -44,7 +44,7 @@ Existing ProjectMER block types remain compatible. RME extensions are generic pr
 | 0 | Empty hierarchy node | none |
 | 1 | Primitive | `PrimitiveType`, `Color`, `PrimitiveFlags` |
 | 2 | Light | `Color`, `Intensity`, `Range`, `LightType`, `ShadowType`, `Shape`, angles |
-| 3 | Pickup | `ItemType`, `Chance`, `Locked` |
+| 3 | Pickup | `ItemType`, optional `CustomItemName`, `Chance`, `Locked` |
 | 4 | Workstation | `IsInteractable` |
 | 5 | Nested custom object | `Prefab` or `SchematicName` |
 | 7 | Locker | `LockerType`, `Chance`, `OpenedChambers`, `KeycardPermissions` |

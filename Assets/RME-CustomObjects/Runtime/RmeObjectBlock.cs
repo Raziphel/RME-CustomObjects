@@ -28,6 +28,7 @@ namespace RazisRealm.RmeCustomObjects
         public bool IsLocked;
         public bool IsInteractable = true;
         public int ItemType;
+        public string CustomItemName;
         [Range(0f, 100f)] public float Chance = 100f;
         public int LockerType;
         public int RequiredPermissions;

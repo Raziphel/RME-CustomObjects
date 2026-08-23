@@ -6,6 +6,25 @@ namespace RazisRealm.RmeCustomObjects.Editor
     [CustomEditor(typeof(RmeObjectBlock))]
     public sealed class RmeObjectBlockEditor : UnityEditor.Editor
     {
+        private static readonly string[] ItemNames =
+        {
+            "Keycard Janitor", "Keycard Scientist", "Keycard Research Coordinator", "Keycard Zone Manager",
+            "Keycard Guard", "Keycard MTF Private", "Keycard Containment Engineer", "Keycard MTF Operative",
+            "Keycard MTF Captain", "Keycard Facility Manager", "Keycard Chaos Insurgency", "Keycard O5",
+            "Radio", "COM-15", "Medkit", "Flashlight", "Micro H.I.D.", "SCP-500", "SCP-207",
+            "12 Gauge Ammo", "E-11-SR", "Crossvec", "5.56x45 Ammo", "FSP-9", "Logicer",
+            "High-Explosive Grenade", "Flashbang", ".44 Cal Ammo", "7.62x39 Ammo", "9x19 Ammo",
+            "COM-18", "SCP-018", "SCP-268", "Adrenaline", "Painkillers", "Coin", "Light Armor",
+            "Combat Armor", "Heavy Armor", "Revolver", "AK", "Shotgun", "SCP-330", "SCP-2176",
+            "SCP-244-A", "SCP-244-B", "SCP-1853", "Particle Disruptor", "COM-45", "SCP-1576",
+            "Jailbird", "Anti-SCP-207", "FR-MG-0", "A7", "Lantern", "SCP-1344", "Snowball", "Coal",
+            "Special Coal", "SCP-1507 Tape", "Debug Ragdoll Mover", "Surface Access Pass", "SCP-127",
+            "Custom Task Force Keycard", "Custom Site-02 Keycard", "Custom Management Keycard",
+            "Custom Metal Case Keycard", "Marshmallow", "SCP-1509", "SCP-021-J"
+        };
+
+        private static readonly int[] ItemValues = BuildItemValues();
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -25,7 +44,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
             }
             if (kind == RmeBlockKind.Pickup)
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("ItemType"));
+                EditorGUILayout.IntPopup(serializedObject.FindProperty("ItemType"),
+                    new GUIContent("Base Game Item"), ItemNames, ItemValues);
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("CustomItemName"),
+                    new GUIContent("Custom Item Name"));
+                EditorGUILayout.HelpBox("Leave Custom Item Name empty to spawn the selected base-game item. A custom item name overrides the dropdown and must exactly match a RealmPlugin registered custom item.", MessageType.Info);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("Chance"));
             }
             if (kind == RmeBlockKind.Locker)
@@ -65,6 +88,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (kind == RmeBlockKind.NestedObject) EditorGUILayout.PropertyField(serializedObject.FindProperty("NestedObjectName"));
             if (serializedObject.ApplyModifiedProperties()) RmePreviewFactory.Rebuild((RmeObjectBlock)target);
             if (GUILayout.Button("Rebuild Scene Preview")) RmePreviewFactory.Rebuild((RmeObjectBlock)target);
+        }
+
+        private static int[] BuildItemValues()
+        {
+            var values = new int[ItemNames.Length];
+            for (int index = 0; index < values.Length; index++) values[index] = index;
+            return values;
         }
     }
 }

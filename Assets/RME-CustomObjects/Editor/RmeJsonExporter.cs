@@ -67,7 +67,9 @@ namespace RazisRealm.RmeCustomObjects.Editor
                     Add("InnerSpotAngle", F(Mathf.Clamp(block.InnerSpotAngle, 0f, block.SpotAngle)));
                     Add("ShadowStrength", F(Mathf.Clamp01(block.LightShadowStrength))); break;
                 case RmeBlockKind.Pickup:
-                    Add("ItemType", block.ItemType.ToString()); Add("Chance", F(block.Chance)); Add("Locked", B(block.IsLocked)); break;
+                    Add("ItemType", block.ItemType.ToString());
+                    if (!string.IsNullOrWhiteSpace(block.CustomItemName)) Add("CustomItemName", Q(block.CustomItemName.Trim()));
+                    Add("Chance", F(block.Chance)); Add("Locked", B(block.IsLocked)); break;
                 case RmeBlockKind.Workstation: Add("IsInteractable", B(block.IsInteractable)); break;
                 case RmeBlockKind.NestedObject: Add("Prefab", Q(block.NestedObjectName)); break;
                 case RmeBlockKind.Locker:
