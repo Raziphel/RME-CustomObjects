@@ -10,6 +10,8 @@ If Unity Hub displays “Editor version not installed,” use its **Install Edit
 
 After scripts compile, the **RME Builder** window opens automatically and creates a `NewCustomObject` root. Reopen it any time from **RME Custom Objects → Open Builder**. Select the root or one of its children, add primitives or SCP:SL prefabs, arrange and nest them normally in the Scene, edit block properties in the Inspector, and click **Export Selected Custom Object**.
 
+The project tracks a permanent Unity `.meta` file for every RME script. Keep those files beside their matching scripts when copying or updating the project; replacing scripts without their metadata breaks the GUID references stored in existing scenes. Run `python3 tools/validate.py --project` to verify those identities before distributing an update.
+
 Doors have one workflow: search `door` in the SCP:SL prefab browser and select the exact visual you want. Do not add an Interaction Trigger for a door—the real network door supplies its own interaction. Interaction Trigger is only for invisible custom click/hold volumes.
 
 Lights have dedicated one-click presets for Point, Spot Cone, Spot Pyramid, Spot Box, Directional, Rectangle/Area, Disc, and Tube. Each light uses Unity's native `Light` component for a MER-style scene preview. The Inspector exposes type, shape, color, intensity, range, spot angles, shadow mode, and shadow strength; those same values are exported to RME.
