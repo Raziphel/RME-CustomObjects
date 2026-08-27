@@ -10,19 +10,47 @@ namespace RazisRealm.RmeCustomObjects.Editor
         internal const string PreviewName = "__RME_PREVIEW__";
 
         [InitializeOnLoadMethod]
-        private static void HideExistingPreviews()
+        private static void InitializeEditorPreviews()
         {
+            SceneView.duringSceneGui -= SelectPrimitiveFromScene;
+            SceneView.duringSceneGui += SelectPrimitiveFromScene;
             EditorApplication.delayCall += () =>
             {
                 foreach (RmeObjectBlock block in Resources.FindObjectsOfTypeAll<RmeObjectBlock>())
                 {
                     if (!block.gameObject.scene.IsValid() || !block.gameObject.scene.isLoaded) continue;
+                    if (block.Kind == RmeBlockKind.Primitive && block.GetComponent<MeshCollider>() == null)
+                    {
+                        Rebuild(block);
+                        continue;
+                    }
                     Transform preview = block.transform.Find(PreviewName);
                     if (preview != null)
                         preview.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
                 }
                 EditorApplication.RepaintHierarchyWindow();
             };
+        }
+
+        private static void SelectPrimitiveFromScene(SceneView sceneView)
+        {
+            Event current = Event.current;
+            if (current == null || current.type != EventType.MouseDown || current.button != 0 ||
+                current.alt || current.control || current.command || current.shift)
+                return;
+
+            Physics.SyncTransforms();
+            Ray ray = HandleUtility.GUIPointToWorldRay(current.mousePosition);
+            RaycastHit hit = Physics.RaycastAll(ray, float.MaxValue, Physics.DefaultRaycastLayers,
+                    QueryTriggerInteraction.Collide).OrderBy(value => value.distance).FirstOrDefault();
+            RmeObjectBlock block = hit.collider?.GetComponent<RmeObjectBlock>();
+            if (block == null || block.Kind != RmeBlockKind.Primitive)
+                return;
+
+            Selection.activeGameObject = block.gameObject;
+            EditorGUIUtility.PingObject(block.gameObject);
+            current.Use();
+            sceneView.Repaint();
         }
 
         internal static void Rebuild(RmeObjectBlock block)
