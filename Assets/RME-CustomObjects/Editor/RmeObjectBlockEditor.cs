@@ -45,8 +45,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
             }
             if (kind == RmeBlockKind.Pickup)
             {
-                EditorGUILayout.IntPopup(serializedObject.FindProperty("ItemType"),
-                    new GUIContent("Base Game Item"), ItemNames, ItemValues);
+                SerializedProperty itemType = serializedObject.FindProperty("ItemType");
+                EditorGUI.showMixedValue = itemType.hasMultipleDifferentValues;
+                EditorGUI.BeginChangeCheck();
+                int selectedItem = EditorGUILayout.IntPopup("Base Game Item", itemType.intValue,
+                    ItemNames, ItemValues);
+                if (EditorGUI.EndChangeCheck()) itemType.intValue = selectedItem;
+                EditorGUI.showMixedValue = false;
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("CustomItemName"),
                     new GUIContent("Custom Item Name"));
                 EditorGUILayout.HelpBox("Leave Custom Item Name empty to spawn the selected base-game item. A custom item name overrides the dropdown and must exactly match a RealmPlugin registered custom item.", MessageType.Info);
