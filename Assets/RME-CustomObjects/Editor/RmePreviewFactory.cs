@@ -31,6 +31,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
             preview.name = PreviewName;
             preview.transform.SetParent(block.transform, false);
             preview.hideFlags = HideFlags.NotEditable;
+            if (block.Kind == RmeBlockKind.Primitive && !block.PrimitiveVisible)
+                foreach (Renderer renderer in preview.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
             EditorUtility.SetDirty(block.gameObject);
         }
