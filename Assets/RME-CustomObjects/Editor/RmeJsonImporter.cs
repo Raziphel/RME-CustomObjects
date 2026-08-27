@@ -94,12 +94,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
             block.ObjectId = definition.ObjectId;
             block.Kind = (RmeBlockKind)definition.BlockType;
             block.PrimitiveType = (PrimitiveType)properties.PrimitiveType;
-            block.PrimitiveVisible = (properties.PrimitiveFlags & 1) != 0;
-            block.PrimitiveCollidable = (properties.PrimitiveFlags & 2) != 0;
+            RmeBlockCompatibility.SetPrimitiveVisible(block, (properties.PrimitiveFlags & 1) != 0);
+            RmeBlockCompatibility.SetPrimitiveCollidable(block, (properties.PrimitiveFlags & 2) != 0);
             if (!string.IsNullOrWhiteSpace(properties.Color) &&
                 ColorUtility.TryParseHtmlString(properties.Color, out Color color)) block.Color = color;
             block.PrefabName = properties.PrefabName;
-            block.CameraLabel = string.IsNullOrWhiteSpace(properties.CameraLabel) ? "CustomCamera" : properties.CameraLabel;
+            RmeBlockCompatibility.SetCameraLabel(block,
+                string.IsNullOrWhiteSpace(properties.CameraLabel) ? "CustomCamera" : properties.CameraLabel);
             block.IsOpen = properties.IsOpen;
             block.IsLocked = properties.IsLocked || properties.Locked;
             block.IsInteractable = properties.IsInteractable;

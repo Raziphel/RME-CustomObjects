@@ -42,6 +42,15 @@ namespace RazisRealm.RmeCustomObjects.Editor
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("PrimitiveType"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("Color"));
+                SerializedProperty visible = serializedObject.FindProperty("PrimitiveVisible");
+                SerializedProperty collidable = serializedObject.FindProperty("PrimitiveCollidable");
+                if (visible != null && collidable != null)
+                {
+                    EditorGUILayout.PropertyField(visible, new GUIContent("Visible"));
+                    EditorGUILayout.PropertyField(collidable, new GUIContent("Collidable"));
+                }
+                else EditorGUILayout.HelpBox("RME Runtime scripts are out of date. Update the complete Runtime folder to edit visibility and collision.", MessageType.Error);
+                EditorGUILayout.HelpBox("Visible and Collidable are independent MER-compatible primitive flags. Invisible colliders remain selectable through their hierarchy entry.", MessageType.Info);
             }
             if (kind == RmeBlockKind.Pickup)
             {
@@ -86,6 +95,14 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("RequiredPermissions"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("RequireAll"));
             }
+            if (kind == RmeBlockKind.Prefab &&
+                (serializedObject.FindProperty("PrefabName").stringValue ?? string.Empty)
+                    .IndexOf("CameraToy", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                SerializedProperty cameraLabel = serializedObject.FindProperty("CameraLabel");
+                if (cameraLabel != null) EditorGUILayout.PropertyField(cameraLabel, new GUIContent("SCP-079 Camera Name"));
+                else EditorGUILayout.HelpBox("RME Runtime scripts are out of date. Update the complete Runtime folder to name cameras.", MessageType.Error);
+            }
             if (kind == RmeBlockKind.Workstation || kind == RmeBlockKind.Interactable)
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("IsInteractable"));
             if (kind == RmeBlockKind.Interactable)
@@ -110,7 +127,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private static void DrawInvisiblePrimitive(RmeObjectBlock block, GizmoType gizmoType)
         {
             if (block == null || block.Kind != RmeBlockKind.Primitive ||
-                block.PrimitiveVisible && block.Color.a > .001f) return;
+                RmeBlockCompatibility.PrimitiveVisible(block) && block.Color.a > .001f) return;
             Transform preview = block.transform.Find(RmePreviewFactory.PreviewName);
             MeshFilter filter = preview == null ? null : preview.GetComponentInChildren<MeshFilter>();
             if (filter == null || filter.sharedMesh == null) return;
