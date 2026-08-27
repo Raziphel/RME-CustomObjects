@@ -95,8 +95,8 @@ Shader "HDRP/Lit" {
 		[ToggleUI] [HideInInspector] _TransparentZWrite ("_TransparentZWrite", Float) = 0
 		[HideInInspector] _CullMode ("__cullmode", Float) = 2
 		[HideInInspector] _CullModeForward ("__cullmodeForward", Float) = 2
-		[Enum(Off,0,Front,1,Back,2)] _TransparentCullMode ("_TransparentCullMode", Float) = 2
-		[Enum(Off,0,Front,1,Back,2)] _OpaqueCullMode ("_OpaqueCullMode", Float) = 2
+		[Enum(UnityEditor.Rendering.HighDefinition.TransparentCullMode)] _TransparentCullMode ("_TransparentCullMode", Float) = 2
+		[Enum(UnityEditor.Rendering.HighDefinition.OpaqueCullMode)] _OpaqueCullMode ("_OpaqueCullMode", Float) = 2
 		[HideInInspector] _ZTestDepthEqualForOpaque ("_ZTestDepthEqualForOpaque", Float) = 4
 		[HideInInspector] _ZTestGBuffer ("_ZTestGBuffer", Float) = 4
 		[Enum(UnityEngine.Rendering.CompareFunction)] _ZTestTransparent ("Transparent ZTest", Float) = 4
