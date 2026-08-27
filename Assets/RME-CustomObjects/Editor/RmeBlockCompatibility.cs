@@ -5,6 +5,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
     internal static class RmeBlockCompatibility
     {
         private const BindingFlags Fields = BindingFlags.Instance | BindingFlags.Public;
+        internal const int CollidableFlag = 1;
+        internal const int VisibleFlag = 2;
 
         internal static bool HasCurrentSchema =>
             typeof(RmeObjectBlock).GetField("PrimitiveVisible", Fields) != null &&

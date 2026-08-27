@@ -94,8 +94,10 @@ namespace RazisRealm.RmeCustomObjects.Editor
             block.ObjectId = definition.ObjectId;
             block.Kind = (RmeBlockKind)definition.BlockType;
             block.PrimitiveType = (PrimitiveType)properties.PrimitiveType;
-            RmeBlockCompatibility.SetPrimitiveVisible(block, (properties.PrimitiveFlags & 1) != 0);
-            RmeBlockCompatibility.SetPrimitiveCollidable(block, (properties.PrimitiveFlags & 2) != 0);
+            RmeBlockCompatibility.SetPrimitiveVisible(block,
+                (properties.PrimitiveFlags & RmeBlockCompatibility.VisibleFlag) != 0);
+            RmeBlockCompatibility.SetPrimitiveCollidable(block,
+                (properties.PrimitiveFlags & RmeBlockCompatibility.CollidableFlag) != 0);
             if (!string.IsNullOrWhiteSpace(properties.Color) &&
                 ColorUtility.TryParseHtmlString(properties.Color, out Color color)) block.Color = color;
             block.PrefabName = properties.PrefabName;

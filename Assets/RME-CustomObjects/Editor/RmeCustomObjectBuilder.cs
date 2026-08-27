@@ -57,6 +57,15 @@ namespace RazisRealm.RmeCustomObjects.Editor
             }
         }
 
+        [MenuItem("RME Custom Objects/Refresh Imported Material Shaders")]
+        public static void RefreshImportedMaterialShaders()
+        {
+            const string shader = "Assets/Room Reference/DON'T TOUCH/Materials/HDRP_Lit.shader";
+            AssetDatabase.ImportAsset(shader, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+            Debug.Log("[RME Custom Objects] Refreshed the compatibility shader and imported materials.");
+        }
+
         private void OnGUI()
         {
             EditorGUILayout.LabelField("Razi's Realm Custom Objects", EditorStyles.boldLabel);

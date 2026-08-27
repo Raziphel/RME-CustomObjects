@@ -35,6 +35,14 @@ def validate_script_metadata():
     for required in ("EditorSchemaVersion = 2", "PrimitiveVisible", "PrimitiveCollidable", "CameraLabel"):
         if required not in block_source:
             fail(f"RmeObjectBlock runtime/editor schema mismatch: missing {required}")
+    compatibility_source = (scripts / "Editor" / "RmeBlockCompatibility.cs").read_text(encoding="utf-8-sig")
+    for required in ("CollidableFlag = 1", "VisibleFlag = 2"):
+        if required not in compatibility_source:
+            fail(f"primitive flag encoding does not match SCP:SL: missing {required}")
+    invalid_hdrp_drawer = "UnityEditor.Rendering.HighDefinition"
+    for shader in (PROJECT_ROOT / "Assets").rglob("*.shader"):
+        if invalid_hdrp_drawer in shader.read_text(encoding="utf-8-sig", errors="ignore"):
+            fail(f"HDRP-only material drawer remains in {shader.relative_to(PROJECT_ROOT)}")
 
 def fail(message):
     raise ValueError(message)
