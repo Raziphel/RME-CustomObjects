@@ -4,6 +4,7 @@ import json, math, pathlib, sys
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 EXPECTED_SCRIPT_GUIDS = {
     "Assets/RME-CustomObjects/Editor/RmeCustomObjectBuilder.cs": "2fc47c2687764cb0bb40d38c29b7af26",
+    "Assets/RME-CustomObjects/Editor/RmeBlockCompatibility.cs": "02c36d27ccf74066afd4790c50c4a129",
     "Assets/RME-CustomObjects/Editor/RmeJsonExporter.cs": "5e56c96a4f0847b6988eaee725ea3297",
     "Assets/RME-CustomObjects/Editor/RmeJsonImporter.cs": "b7a332db6af5445ba7f37e39958b733b",
     "Assets/RME-CustomObjects/Editor/RmeObjectBlockEditor.cs": "709756e344844ea085b9bb82a7588b7e",

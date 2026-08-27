@@ -55,7 +55,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
             switch (block.Kind)
             {
                 case RmeBlockKind.Primitive:
-                    int flags = (block.PrimitiveVisible ? 1 : 0) | (block.PrimitiveCollidable ? 2 : 0);
+                    int flags = (RmeBlockCompatibility.PrimitiveVisible(block) ? 1 : 0) |
+                                (RmeBlockCompatibility.PrimitiveCollidable(block) ? 2 : 0);
                     Add("PrimitiveType", ((int)block.PrimitiveType).ToString()); Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("PrimitiveFlags", flags.ToString()); break;
                 case RmeBlockKind.Light:
                     Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color)));
@@ -84,7 +85,10 @@ namespace RazisRealm.RmeCustomObjects.Editor
                     if (string.IsNullOrWhiteSpace(block.PrefabName)) throw new InvalidOperationException($"Prefab block '{block.name}' has no PrefabName.");
                     Add("PrefabName", Q(block.PrefabName));
                     if (block.PrefabName.IndexOf("CameraToy", StringComparison.OrdinalIgnoreCase) >= 0)
-                        Add("CameraLabel", Q(string.IsNullOrWhiteSpace(block.CameraLabel) ? "CustomCamera" : block.CameraLabel.Trim()));
+                    {
+                        string label = RmeBlockCompatibility.CameraLabel(block);
+                        Add("CameraLabel", Q(string.IsNullOrWhiteSpace(label) ? "CustomCamera" : label.Trim()));
+                    }
                     DoorProperties(block, Add); break;
             }
             return "{" + string.Join(",", values) + "}";
