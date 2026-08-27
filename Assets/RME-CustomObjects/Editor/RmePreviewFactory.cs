@@ -9,9 +9,27 @@ namespace RazisRealm.RmeCustomObjects.Editor
     {
         internal const string PreviewName = "__RME_PREVIEW__";
 
+        [InitializeOnLoadMethod]
+        private static void HideExistingPreviews()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                foreach (RmeObjectBlock block in Resources.FindObjectsOfTypeAll<RmeObjectBlock>())
+                {
+                    if (!block.gameObject.scene.IsValid() || !block.gameObject.scene.isLoaded) continue;
+                    Transform preview = block.transform.Find(PreviewName);
+                    if (preview != null)
+                        preview.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable | HideFlags.DontSaveInBuild;
+                }
+                EditorApplication.RepaintHierarchyWindow();
+            };
+        }
+
         internal static void Rebuild(RmeObjectBlock block)
         {
             if (block == null) return;
+            if (block.Kind == RmeBlockKind.Primitive)
+                RemoveLegacyPrimitiveComponents(block.gameObject);
             Transform existing = block.transform.Find(PreviewName);
             if (existing != null) Object.DestroyImmediate(existing.gameObject);
             GameObject preview = block.Kind switch
@@ -30,9 +48,18 @@ namespace RazisRealm.RmeCustomObjects.Editor
             };
             preview.name = PreviewName;
             preview.transform.SetParent(block.transform, false);
-            preview.hideFlags = HideFlags.NotEditable;
+            preview.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable | HideFlags.DontSaveInBuild;
+            if (block.Kind == RmeBlockKind.Primitive && !block.PrimitiveVisible)
+                foreach (Renderer renderer in preview.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
             EditorUtility.SetDirty(block.gameObject);
+        }
+
+        private static void RemoveLegacyPrimitiveComponents(GameObject value)
+        {
+            foreach (Collider collider in value.GetComponents<Collider>()) Object.DestroyImmediate(collider);
+            foreach (Renderer renderer in value.GetComponents<Renderer>()) Object.DestroyImmediate(renderer);
+            foreach (MeshFilter filter in value.GetComponents<MeshFilter>()) Object.DestroyImmediate(filter);
         }
 
         private static GameObject LightPreview(RmeObjectBlock block)
@@ -127,13 +154,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 material.color = color;
                 if (color.a < 1f)
                 {
-                    material.SetFloat("_Mode", 3f);
+                    material.SetFloat("_Mode", 2f);
                     material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                     material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                     material.SetInt("_ZWrite", 0);
                     material.DisableKeyword("_ALPHATEST_ON");
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
                     material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                 }
                 renderer.sharedMaterial = material;

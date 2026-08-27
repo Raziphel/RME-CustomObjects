@@ -10,11 +10,15 @@ If Unity Hub displays “Editor version not installed,” use its **Install Edit
 
 After scripts compile, the **RME Builder** window opens automatically and creates a `NewCustomObject` root. Reopen it any time from **RME Custom Objects → Open Builder**. Select the root or one of its children, add primitives or SCP:SL prefabs, arrange and nest them normally in the Scene, edit block properties in the Inspector, and click **Export Selected Custom Object**.
 
-The project tracks a permanent Unity `.meta` file for every RME script. Keep those files beside their matching scripts when copying or updating the project; replacing scripts without their metadata breaks the GUID references stored in existing scenes. Run `python3 tools/validate.py --project` to verify those identities before distributing an update.
+Use **Import JSON for Editing** in the builder—or **RME Custom Objects → Import JSON for Editing**—to reconstruct an exported custom-object JSON as a new editable Unity hierarchy. The importer restores parent relationships, local transforms, block types, supported properties, primitive flags, text, lights, custom pickups, and prefab previews. Sidecar rigidbody, teleport, and animator files remain separate and are not imported.
+
+The project tracks and validation-pins a permanent Unity `.meta` GUID for every RME script. Keep those files beside their matching scripts when copying or updating the project; replacing scripts without their metadata breaks the GUID references stored in existing scenes. Run `python3 tools/validate.py --project` to verify the exact identities before distributing an update. Add fields without renaming/removing existing serialized fields; use Unity's `FormerlySerializedAs` attribute if a rename is unavoidable.
 
 Doors have one workflow: search `door` in the SCP:SL prefab browser and select the exact visual you want. Do not add an Interaction Trigger for a door—the real network door supplies its own interaction. Interaction Trigger is only for invisible custom click/hold volumes.
 
 Lights have dedicated one-click presets for Point, Spot Cone, Spot Pyramid, Spot Box, Directional, Rectangle/Area, Disc, and Tube. Each light uses Unity's native `Light` component for a MER-style scene preview. The Inspector exposes type, shape, color, intensity, range, spot angles, shadow mode, and shadow strength; those same values are exported to RME.
+
+Primitive blocks expose independent **Visible** and **Collidable** toggles using MER's `PrimitiveFlags` values. This permits invisible barriers, visible decoration without collision, both behaviours, or neither. Primitive color alpha is rendered transparently in the Scene view; primitives with Visible disabled or zero alpha remain editable through a cyan wireframe gizmo. Internal scene previews are hidden from the hierarchy and are never exported as blocks. Camera prefabs whose names end in `CameraToy` also expose an **SCP-079 Camera Name** field that is applied to the network camera in-game.
 
 Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes and scripts are not redistributable as a complete Unity package. The exported block stores the exact network-prefab name; RealmPlugin replaces that proxy with the genuine interactive server prefab when the RME map loads.
 
