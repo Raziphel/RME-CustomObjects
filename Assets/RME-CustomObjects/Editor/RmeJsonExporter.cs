@@ -55,8 +55,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
             switch (block.Kind)
             {
                 case RmeBlockKind.Primitive:
-                    int flags = (RmeBlockCompatibility.PrimitiveVisible(block) ? 1 : 0) |
-                                (RmeBlockCompatibility.PrimitiveCollidable(block) ? 2 : 0);
+                    int flags = (RmeBlockCompatibility.PrimitiveVisible(block) ? RmeBlockCompatibility.VisibleFlag : 0) |
+                                (RmeBlockCompatibility.PrimitiveCollidable(block) ? RmeBlockCompatibility.CollidableFlag : 0);
                     Add("PrimitiveType", ((int)block.PrimitiveType).ToString()); Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("PrimitiveFlags", flags.ToString()); break;
                 case RmeBlockKind.Light:
                     Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color)));

@@ -14,6 +14,8 @@ Use **Import JSON for Editing** in the builder—or **RME Custom Objects → Imp
 
 Always update the complete `Assets/RME-CustomObjects` folder, including both `Runtime` and `Editor`. Copying only the Editor folder causes compiler errors because the importer and preview tools share the versioned `RmeObjectBlock` runtime schema. If Unity was open during an external update, use **Assets → Refresh** after all files finish copying.
 
+If Unity still reports missing `UnityEditor.Rendering.HighDefinition` culling enums after an update, run **RME Custom Objects → Refresh Imported Material Shaders**. The included compatibility shader uses built-in culling values; the command forces Unity to discard an older cached HDRP material drawer.
+
 The project tracks and validation-pins a permanent Unity `.meta` GUID for every RME script. Keep those files beside their matching scripts when copying or updating the project; replacing scripts without their metadata breaks the GUID references stored in existing scenes. Run `python3 tools/validate.py --project` to verify the exact identities before distributing an update. Add fields without renaming/removing existing serialized fields; use Unity's `FormerlySerializedAs` attribute if a rename is unavoidable.
 
 Doors have one workflow: search `door` in the SCP:SL prefab browser and select the exact visual you want. Do not add an Interaction Trigger for a door—the real network door supplies its own interaction. Interaction Trigger is only for invisible custom click/hold volumes.
@@ -21,6 +23,8 @@ Doors have one workflow: search `door` in the SCP:SL prefab browser and select t
 Lights have dedicated one-click presets for Point, Spot Cone, Spot Pyramid, Spot Box, Directional, Rectangle/Area, Disc, and Tube. Each light uses Unity's native `Light` component for a MER-style scene preview. The Inspector exposes type, shape, color, intensity, range, spot angles, shadow mode, and shadow strength; those same values are exported to RME.
 
 Primitive blocks expose independent **Visible** and **Collidable** toggles using MER's `PrimitiveFlags` values. This permits invisible barriers, visible decoration without collision, both behaviours, or neither. Primitive color alpha is rendered transparently in the Scene view; primitives with Visible disabled or zero alpha remain editable through a cyan wireframe gizmo. Internal scene previews are hidden from the hierarchy and are never exported as blocks. Camera prefabs whose names end in `CameraToy` also expose an **SCP-079 Camera Name** field that is applied to the network camera in-game.
+
+SCP:SL encodes `Collidable` as bit 1 and `Visible` as bit 2. Exported values therefore use `0` for neither, `1` for collision only, `2` for visibility only, and `3` for both.
 
 Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes and scripts are not redistributable as a complete Unity package. The exported block stores the exact network-prefab name; RealmPlugin replaces that proxy with the genuine interactive server prefab when the RME map loads.
 
