@@ -39,6 +39,24 @@ namespace RazisRealm.RmeCustomObjects.Editor
             Selection.activeGameObject = root;
         }
 
+        [MenuItem("RME Custom Objects/Import JSON for Editing")]
+        public static void ImportJson()
+        {
+            string path = EditorUtility.OpenFilePanel("Import RME Custom Object", "", "json");
+            if (string.IsNullOrEmpty(path)) return;
+            try
+            {
+                RmeCustomObjectRoot root = RmeJsonImporter.Import(path);
+                EditorUtility.DisplayDialog("RME Custom Object imported",
+                    $"Imported {root.ObjectName}\n\nThe hierarchy and editable RME properties have been reconstructed in the current scene.", "Edit");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("[RME Custom Objects] Import failed: " + exception);
+                EditorUtility.DisplayDialog("RME import failed", exception.Message, "Close");
+            }
+        }
+
         private void OnGUI()
         {
             EditorGUILayout.LabelField("Razi's Realm Custom Objects", EditorStyles.boldLabel);
@@ -48,6 +66,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 : $"Editing: {activeRoot.ObjectName}  •  {activeRoot.GetComponentsInChildren<RmeObjectBlock>(true).Length} blocks",
                 activeRoot == null ? MessageType.Warning : MessageType.Info);
             if (GUILayout.Button("Create Custom Object Root")) CreateRoot();
+            if (GUILayout.Button("Import JSON for Editing", GUILayout.Height(28))) ImportJson();
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Primitive", EditorStyles.boldLabel);
@@ -155,12 +174,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
 
         private static void AddPrimitive(PrimitiveType type)
         {
-            GameObject value = GameObject.CreatePrimitive(type);
+            var value = new GameObject(type.ToString());
             value.name = type.ToString();
             value.transform.SetParent(PlacementParent(), false);
             RmeObjectBlock block = value.AddComponent<RmeObjectBlock>();
             block.Kind = RmeBlockKind.Primitive;
             block.PrimitiveType = type;
+            RmePreviewFactory.Rebuild(block);
             Undo.RegisterCreatedObjectUndo(value, "Add RME primitive");
             Selection.activeGameObject = value;
             SceneView.lastActiveSceneView?.FrameSelected();

@@ -116,6 +116,19 @@ namespace RazisRealm.RmeCustomObjects.Editor
             foreach (Object value in targets) RmePreviewFactory.Rebuild((RmeObjectBlock)value);
         }
 
+        [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected | GizmoType.Pickable)]
+        private static void DrawInvisiblePrimitive(RmeObjectBlock block, GizmoType gizmoType)
+        {
+            if (block == null || block.Kind != RmeBlockKind.Primitive ||
+                block.PrimitiveVisible && block.Color.a > .001f) return;
+            Transform preview = block.transform.Find(RmePreviewFactory.PreviewName);
+            MeshFilter filter = preview == null ? null : preview.GetComponentInChildren<MeshFilter>();
+            if (filter == null || filter.sharedMesh == null) return;
+            Gizmos.color = new Color(.2f, .85f, 1f, .9f);
+            Gizmos.matrix = filter.transform.localToWorldMatrix;
+            Gizmos.DrawWireMesh(filter.sharedMesh);
+        }
+
         private static int[] BuildItemValues()
         {
             var values = new int[ItemNames.Length];

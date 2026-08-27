@@ -2,6 +2,15 @@
 import json, math, pathlib, sys
 
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
+EXPECTED_SCRIPT_GUIDS = {
+    "Assets/RME-CustomObjects/Editor/RmeCustomObjectBuilder.cs": "2fc47c2687764cb0bb40d38c29b7af26",
+    "Assets/RME-CustomObjects/Editor/RmeJsonExporter.cs": "5e56c96a4f0847b6988eaee725ea3297",
+    "Assets/RME-CustomObjects/Editor/RmeJsonImporter.cs": "b7a332db6af5445ba7f37e39958b733b",
+    "Assets/RME-CustomObjects/Editor/RmeObjectBlockEditor.cs": "709756e344844ea085b9bb82a7588b7e",
+    "Assets/RME-CustomObjects/Editor/RmePreviewFactory.cs": "d5652e886772462d8783db39b66dc89e",
+    "Assets/RME-CustomObjects/Runtime/RmeCustomObjectRoot.cs": "a68b9d0c693147f2b9608f21bc8b4ac1",
+    "Assets/RME-CustomObjects/Runtime/RmeObjectBlock.cs": "4c1d2e9ab8f34d65a028bf0fe7e55c92",
+}
 
 def validate_script_metadata():
     scripts = PROJECT_ROOT / "Assets" / "RME-CustomObjects"
@@ -14,7 +23,13 @@ def validate_script_metadata():
         if not guid_line: fail(f"Unity metadata has no GUID for {script.relative_to(PROJECT_ROOT)}")
         guid = guid_line.removeprefix("guid: ").strip()
         if guid in guids: fail(f"duplicate Unity script GUID in {script.relative_to(PROJECT_ROOT)} and {guids[guid]}")
-        guids[guid] = script.relative_to(PROJECT_ROOT)
+        relative = script.relative_to(PROJECT_ROOT)
+        expected = EXPECTED_SCRIPT_GUIDS.get(relative.as_posix())
+        if expected is None: fail(f"Unity script identity is not pinned for {relative}")
+        if guid != expected: fail(f"Unity script GUID changed for {relative}: expected {expected}, found {guid}")
+        guids[guid] = relative
+    missing = set(EXPECTED_SCRIPT_GUIDS) - {path.as_posix() for path in guids.values()}
+    if missing: fail(f"pinned Unity scripts are missing: {', '.join(sorted(missing))}")
 
 def fail(message):
     raise ValueError(message)
