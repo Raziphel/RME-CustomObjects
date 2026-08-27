@@ -12,6 +12,8 @@ After scripts compile, the **RME Builder** window opens automatically and create
 
 Use **Import JSON for Editing** in the builder—or **RME Custom Objects → Import JSON for Editing**—to reconstruct an exported custom-object JSON as a new editable Unity hierarchy. The importer restores parent relationships, local transforms, block types, supported properties, primitive flags, text, lights, custom pickups, and prefab previews. Sidecar rigidbody, teleport, and animator files remain separate and are not imported.
 
+Always update the complete `Assets/RME-CustomObjects` folder, including both `Runtime` and `Editor`. Copying only the Editor folder causes compiler errors because the importer and preview tools share the versioned `RmeObjectBlock` runtime schema. If Unity was open during an external update, use **Assets → Refresh** after all files finish copying.
+
 The project tracks and validation-pins a permanent Unity `.meta` GUID for every RME script. Keep those files beside their matching scripts when copying or updating the project; replacing scripts without their metadata breaks the GUID references stored in existing scenes. Run `python3 tools/validate.py --project` to verify the exact identities before distributing an update. Add fields without renaming/removing existing serialized fields; use Unity's `FormerlySerializedAs` attribute if a rename is unavoidable.
 
 Doors have one workflow: search `door` in the SCP:SL prefab browser and select the exact visual you want. Do not add an Interaction Trigger for a door—the real network door supplies its own interaction. Interaction Trigger is only for invisible custom click/hold volumes.
