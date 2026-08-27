@@ -19,6 +19,7 @@ namespace RazisRealm.RmeCustomObjects
     [DisallowMultipleComponent]
     public sealed class RmeObjectBlock : MonoBehaviour
     {
+        public const int EditorSchemaVersion = 2;
         [HideInInspector] public int ObjectId;
         public RmeBlockKind Kind = RmeBlockKind.Primitive;
         public string PrefabName;
