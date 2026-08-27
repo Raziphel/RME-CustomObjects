@@ -55,7 +55,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
             switch (block.Kind)
             {
                 case RmeBlockKind.Primitive:
-                    Add("PrimitiveType", ((int)block.PrimitiveType).ToString()); Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("PrimitiveFlags", "3"); break;
+                    int flags = (block.PrimitiveVisible ? 1 : 0) | (block.PrimitiveCollidable ? 2 : 0);
+                    Add("PrimitiveType", ((int)block.PrimitiveType).ToString()); Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("PrimitiveFlags", flags.ToString()); break;
                 case RmeBlockKind.Light:
                     Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color)));
                     Add("Intensity", F(Mathf.Clamp(block.LightIntensity, 0f, 100f)));
@@ -81,7 +82,10 @@ namespace RazisRealm.RmeCustomObjects.Editor
                     Add("DoorType", "1"); DoorProperties(block, Add); break;
                 case RmeBlockKind.Prefab:
                     if (string.IsNullOrWhiteSpace(block.PrefabName)) throw new InvalidOperationException($"Prefab block '{block.name}' has no PrefabName.");
-                    Add("PrefabName", Q(block.PrefabName)); DoorProperties(block, Add); break;
+                    Add("PrefabName", Q(block.PrefabName));
+                    if (block.PrefabName.IndexOf("CameraToy", StringComparison.OrdinalIgnoreCase) >= 0)
+                        Add("CameraLabel", Q(string.IsNullOrWhiteSpace(block.CameraLabel) ? "CustomCamera" : block.CameraLabel.Trim()));
+                    DoorProperties(block, Add); break;
             }
             return "{" + string.Join(",", values) + "}";
         }
