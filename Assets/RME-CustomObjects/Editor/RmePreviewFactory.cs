@@ -12,14 +12,12 @@ namespace RazisRealm.RmeCustomObjects.Editor
         [InitializeOnLoadMethod]
         private static void InitializeEditorPreviews()
         {
-            SceneView.duringSceneGui -= SelectPrimitiveFromScene;
-            SceneView.duringSceneGui += SelectPrimitiveFromScene;
             EditorApplication.delayCall += () =>
             {
                 foreach (RmeObjectBlock block in Resources.FindObjectsOfTypeAll<RmeObjectBlock>())
                 {
                     if (!block.gameObject.scene.IsValid() || !block.gameObject.scene.isLoaded) continue;
-                    if (block.Kind == RmeBlockKind.Primitive && block.GetComponent<MeshCollider>() == null)
+                    if (block.Kind == RmeBlockKind.Primitive && block.GetComponent<MeshRenderer>() == null)
                     {
                         Rebuild(block);
                         continue;
@@ -30,27 +28,6 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 }
                 EditorApplication.RepaintHierarchyWindow();
             };
-        }
-
-        private static void SelectPrimitiveFromScene(SceneView sceneView)
-        {
-            Event current = Event.current;
-            if (current == null || current.type != EventType.MouseDown || current.button != 0 ||
-                current.alt || current.control || current.command || current.shift)
-                return;
-
-            Physics.SyncTransforms();
-            Ray ray = HandleUtility.GUIPointToWorldRay(current.mousePosition);
-            RaycastHit hit = Physics.RaycastAll(ray, float.MaxValue, Physics.DefaultRaycastLayers,
-                    QueryTriggerInteraction.Collide).OrderBy(value => value.distance).FirstOrDefault();
-            RmeObjectBlock block = hit.collider?.GetComponent<RmeObjectBlock>();
-            if (block == null || block.Kind != RmeBlockKind.Primitive)
-                return;
-
-            Selection.activeGameObject = block.gameObject;
-            EditorGUIUtility.PingObject(block.gameObject);
-            current.Use();
-            sceneView.Repaint();
         }
 
         internal static void Rebuild(RmeObjectBlock block)
@@ -74,23 +51,38 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 RmeBlockKind.Prefab => ImportedPrefab(block.PrefabName) ?? PrefabProxy(block.PrefabName),
                 _ => Box("Block preview", Vector3.one, Color.gray)
             };
+            if (block.Kind == RmeBlockKind.Primitive)
+            {
+                ApplyPrimitiveComponents(block, preview);
+                Object.DestroyImmediate(preview);
+                EditorUtility.SetDirty(block.gameObject);
+                return;
+            }
             preview.name = PreviewName;
             preview.transform.SetParent(block.transform, false);
             preview.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
-            if (block.Kind == RmeBlockKind.Primitive && !RmeBlockCompatibility.PrimitiveVisible(block))
-                foreach (Renderer renderer in preview.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
-            if (block.Kind == RmeBlockKind.Primitive)
-            {
-                Mesh mesh = preview.GetComponent<MeshFilter>()?.sharedMesh;
-                if (mesh != null)
-                {
-                    MeshCollider selectionCollider = block.gameObject.AddComponent<MeshCollider>();
-                    selectionCollider.sharedMesh = mesh;
-                    selectionCollider.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInBuild;
-                }
-            }
             EditorUtility.SetDirty(block.gameObject);
+        }
+
+        private static void ApplyPrimitiveComponents(RmeObjectBlock block, GameObject preview)
+        {
+            Mesh mesh = preview.GetComponent<MeshFilter>()?.sharedMesh;
+            Material material = preview.GetComponent<Renderer>()?.sharedMaterial;
+            if (mesh == null) return;
+
+            MeshFilter filter = block.gameObject.AddComponent<MeshFilter>();
+            filter.sharedMesh = mesh;
+            filter.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInBuild;
+
+            MeshRenderer renderer = block.gameObject.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = material;
+            renderer.enabled = RmeBlockCompatibility.PrimitiveVisible(block);
+            renderer.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInBuild;
+
+            MeshCollider collider = block.gameObject.AddComponent<MeshCollider>();
+            collider.sharedMesh = mesh;
+            collider.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInBuild;
         }
 
         private static void RemoveLegacyPrimitiveComponents(GameObject value)
