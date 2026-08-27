@@ -19,7 +19,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
                     if (!block.gameObject.scene.IsValid() || !block.gameObject.scene.isLoaded) continue;
                     Transform preview = block.transform.Find(PreviewName);
                     if (preview != null)
-                        preview.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable | HideFlags.DontSaveInBuild;
+                        preview.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
                 }
                 EditorApplication.RepaintHierarchyWindow();
             };
@@ -48,7 +48,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             };
             preview.name = PreviewName;
             preview.transform.SetParent(block.transform, false);
-            preview.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable | HideFlags.DontSaveInBuild;
+            preview.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
             if (block.Kind == RmeBlockKind.Primitive && !RmeBlockCompatibility.PrimitiveVisible(block))
                 foreach (Renderer renderer in preview.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);

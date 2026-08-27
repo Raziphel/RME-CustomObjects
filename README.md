@@ -24,6 +24,8 @@ Lights have dedicated one-click presets for Point, Spot Cone, Spot Pyramid, Spot
 
 Primitive blocks expose independent **Visible** and **Collidable** toggles using MER's `PrimitiveFlags` values. This permits invisible barriers, visible decoration without collision, both behaviours, or neither. Primitive color alpha is rendered transparently in the Scene view; primitives with Visible disabled or zero alpha remain editable through a cyan wireframe gizmo. Internal scene previews are hidden from the hierarchy and are never exported as blocks. Camera prefabs whose names end in `CameraToy` also expose an **SCP-079 Camera Name** field that is applied to the network camera in-game.
 
+Visible preview geometry is selectable across its complete surface and resolves to the owning RME block. Invisible primitives remain selectable through their cyan wireframe rather than only through the transform pivot.
+
 SCP:SL encodes `Collidable` as bit 1 and `Visible` as bit 2. Exported values therefore use `0` for neither, `1` for collision only, `2` for visibility only, and `3` for both.
 
 Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes and scripts are not redistributable as a complete Unity package. The exported block stores the exact network-prefab name; RealmPlugin replaces that proxy with the genuine interactive server prefab when the RME map loads.

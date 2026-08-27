@@ -32,7 +32,7 @@ def validate_script_metadata():
     missing = set(EXPECTED_SCRIPT_GUIDS) - {path.as_posix() for path in guids.values()}
     if missing: fail(f"pinned Unity scripts are missing: {', '.join(sorted(missing))}")
     block_source = (scripts / "Runtime" / "RmeObjectBlock.cs").read_text(encoding="utf-8-sig")
-    for required in ("EditorSchemaVersion = 2", "PrimitiveVisible", "PrimitiveCollidable", "CameraLabel"):
+    for required in ("EditorSchemaVersion = 2", "[SelectionBase]", "PrimitiveVisible", "PrimitiveCollidable", "CameraLabel"):
         if required not in block_source:
             fail(f"RmeObjectBlock runtime/editor schema mismatch: missing {required}")
     compatibility_source = (scripts / "Editor" / "RmeBlockCompatibility.cs").read_text(encoding="utf-8-sig")

@@ -17,6 +17,7 @@ namespace RazisRealm.RmeCustomObjects
     public enum RmeLightShape { Cone = 0 }
 
     [DisallowMultipleComponent]
+    [SelectionBase]
     public sealed class RmeObjectBlock : MonoBehaviour
     {
         public const int EditorSchemaVersion = 2;
