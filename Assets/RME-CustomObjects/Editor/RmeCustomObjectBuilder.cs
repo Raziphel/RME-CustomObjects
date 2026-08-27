@@ -89,6 +89,16 @@ namespace RazisRealm.RmeCustomObjects.Editor
             }
 
             EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Toys", EditorStyles.boldLabel);
+            using (new EditorGUI.DisabledScope(FindRoot() == null))
+            {
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Text Toy")) AddSimple("Text Toy", RmeBlockKind.Text);
+                if (GUILayout.Button("Waypoint Toy")) AddSimple("Waypoint Toy", RmeBlockKind.Waypoint);
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField("Interactive blocks", EditorStyles.boldLabel);
             using (new EditorGUI.DisabledScope(FindRoot() == null))
             {

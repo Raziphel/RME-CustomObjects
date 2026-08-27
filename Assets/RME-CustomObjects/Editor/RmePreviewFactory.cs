@@ -1,4 +1,5 @@
 using System.Linq;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,6 +23,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 RmeBlockKind.Locker => Box("Locker preview", new Vector3(1.8f, 2.1f, .65f), new Color(.35f, .4f, .45f)),
                 RmeBlockKind.Door => Box("Door preview", new Vector3(2.3f, 2.8f, .18f), new Color(.25f, .3f, .35f)),
                 RmeBlockKind.Interactable => Box("Interactable preview", Vector3.one, new Color(.8f, .35f, .85f, .45f)),
+                RmeBlockKind.Text => TextPreview(block),
+                RmeBlockKind.Waypoint => Sphere("Waypoint preview", new Vector3(.3f, .3f, .3f), new Color(.3f, .85f, 1f, .55f)),
                 RmeBlockKind.Prefab => ImportedPrefab(block.PrefabName) ?? PrefabProxy(block.PrefabName),
                 _ => Box("Block preview", Vector3.one, Color.gray)
             };
@@ -52,6 +55,21 @@ namespace RazisRealm.RmeCustomObjects.Editor
             light.shadows = block.LightShadows;
             light.shadowStrength = Mathf.Clamp01(block.LightShadowStrength);
             light.areaSize = Vector2.one;
+            return value;
+        }
+
+        private static GameObject TextPreview(RmeObjectBlock block)
+        {
+            var value = new GameObject("Text Toy preview");
+            TextMeshPro text = value.AddComponent<TextMeshPro>();
+            text.text = string.IsNullOrEmpty(block.Text) ? "Custom Text" : block.Text;
+            text.alignment = TextAlignmentOptions.Center;
+            text.fontSize = 2f;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = .1f;
+            text.fontSizeMax = 2f;
+            text.rectTransform.sizeDelta = new Vector2(
+                Mathf.Max(.05f, block.TextDisplaySize.x), Mathf.Max(.05f, block.TextDisplaySize.y));
             return value;
         }
 
