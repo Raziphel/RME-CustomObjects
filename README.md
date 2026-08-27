@@ -16,8 +16,6 @@ Doors have one workflow: search `door` in the SCP:SL prefab browser and select t
 
 Lights have dedicated one-click presets for Point, Spot Cone, Spot Pyramid, Spot Box, Directional, Rectangle/Area, Disc, and Tube. Each light uses Unity's native `Light` component for a MER-style scene preview. The Inspector exposes type, shape, color, intensity, range, spot angles, shadow mode, and shadow strength; those same values are exported to RME.
 
-Primitive blocks expose independent **Visible** and **Collidable** toggles using MER's `PrimitiveFlags` values. This permits invisible barriers, visible decoration without collision, both behaviours, or neither. Camera prefabs whose names end in `CameraToy` also expose an **SCP-079 Camera Name** field that is applied to the network camera in-game.
-
 Prefab blocks use editor-safe visual proxies because SCP:SL's original meshes and scripts are not redistributable as a complete Unity package. The exported block stores the exact network-prefab name; RealmPlugin replaces that proxy with the genuine interactive server prefab when the RME map loads.
 
 The `Assets/RME-CustomObjects/Prefabs/RRP` folder contains all 26 prefab descriptors from the supplied `RRP.zip`. The builder searches and instantiates those real assets first. If Unity cannot resolve a prefab's external game mesh/material GUIDs, it automatically shows a clearly shaped fallback preview instead of creating an invisible or broken scene object. Either preview exports the same exact interactive server-prefab name.

@@ -42,11 +42,6 @@ namespace RazisRealm.RmeCustomObjects.Editor
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("PrimitiveType"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("Color"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("PrimitiveVisible"),
-                    new GUIContent("Visible"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("PrimitiveCollidable"),
-                    new GUIContent("Collidable"));
-                EditorGUILayout.HelpBox("Visible and Collidable are independent MER-compatible primitive flags. Invisible colliders remain selectable through their hierarchy entry.", MessageType.Info);
             }
             if (kind == RmeBlockKind.Pickup)
             {
@@ -91,11 +86,6 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("RequiredPermissions"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("RequireAll"));
             }
-            if (kind == RmeBlockKind.Prefab &&
-                (serializedObject.FindProperty("PrefabName").stringValue ?? string.Empty)
-                    .IndexOf("CameraToy", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("CameraLabel"),
-                    new GUIContent("SCP-079 Camera Name"));
             if (kind == RmeBlockKind.Workstation || kind == RmeBlockKind.Interactable)
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("IsInteractable"));
             if (kind == RmeBlockKind.Interactable)

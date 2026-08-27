@@ -24,9 +24,6 @@ namespace RazisRealm.RmeCustomObjects
         public string PrefabName;
         public PrimitiveType PrimitiveType = PrimitiveType.Cube;
         public Color Color = Color.white;
-        public bool PrimitiveVisible = true;
-        public bool PrimitiveCollidable = true;
-        public string CameraLabel = "CustomCamera";
         public bool IsOpen;
         public bool IsLocked;
         public bool IsInteractable = true;
