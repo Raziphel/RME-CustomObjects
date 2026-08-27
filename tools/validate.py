@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 import json, math, pathlib, sys
 
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+def validate_script_metadata():
+    scripts = PROJECT_ROOT / "Assets" / "RME-CustomObjects"
+    guids = {}
+    for script in scripts.rglob("*.cs"):
+        meta = pathlib.Path(str(script) + ".meta")
+        if not meta.is_file(): fail(f"Unity metadata is missing for {script.relative_to(PROJECT_ROOT)}")
+        guid_line = next((line for line in meta.read_text(encoding="utf-8").splitlines()
+                          if line.startswith("guid: ")), None)
+        if not guid_line: fail(f"Unity metadata has no GUID for {script.relative_to(PROJECT_ROOT)}")
+        guid = guid_line.removeprefix("guid: ").strip()
+        if guid in guids: fail(f"duplicate Unity script GUID in {script.relative_to(PROJECT_ROOT)} and {guids[guid]}")
+        guids[guid] = script.relative_to(PROJECT_ROOT)
+
 def fail(message):
     raise ValueError(message)
 
@@ -32,6 +47,15 @@ def validate(path):
     print(f"OK: {path} ({len(blocks)} blocks)")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2: print("usage: validate.py OBJECT.json", file=sys.stderr); sys.exit(2)
-    try: validate(pathlib.Path(sys.argv[1]))
+    if len(sys.argv) == 2 and sys.argv[1] == "--project":
+        try:
+            validate_script_metadata()
+            print("OK: Unity script metadata is stable")
+        except Exception as error:
+            print(f"ERROR: {error}", file=sys.stderr); sys.exit(1)
+        sys.exit(0)
+    if len(sys.argv) != 2: print("usage: validate.py OBJECT.json | --project", file=sys.stderr); sys.exit(2)
+    try:
+        validate_script_metadata()
+        validate(pathlib.Path(sys.argv[1]))
     except Exception as error: print(f"ERROR: {error}", file=sys.stderr); sys.exit(1)
