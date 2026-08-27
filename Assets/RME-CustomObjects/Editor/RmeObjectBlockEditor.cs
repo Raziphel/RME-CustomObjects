@@ -4,6 +4,7 @@ using UnityEngine;
 namespace RazisRealm.RmeCustomObjects.Editor
 {
     [CustomEditor(typeof(RmeObjectBlock))]
+    [CanEditMultipleObjects]
     public sealed class RmeObjectBlockEditor : UnityEditor.Editor
     {
         private static readonly string[] ItemNames =
@@ -86,8 +87,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.HelpBox("An Interaction Trigger is an invisible clickable volume for scripted map interactions. It does not create a door.", MessageType.None);
             if (kind == RmeBlockKind.Text) EditorGUILayout.PropertyField(serializedObject.FindProperty("Text"));
             if (kind == RmeBlockKind.NestedObject) EditorGUILayout.PropertyField(serializedObject.FindProperty("NestedObjectName"));
-            if (serializedObject.ApplyModifiedProperties()) RmePreviewFactory.Rebuild((RmeObjectBlock)target);
-            if (GUILayout.Button("Rebuild Scene Preview")) RmePreviewFactory.Rebuild((RmeObjectBlock)target);
+            if (serializedObject.ApplyModifiedProperties()) RebuildTargets();
+            if (GUILayout.Button("Rebuild Scene Preview")) RebuildTargets();
+        }
+
+        private void RebuildTargets()
+        {
+            foreach (Object value in targets) RmePreviewFactory.Rebuild((RmeObjectBlock)value);
         }
 
         private static int[] BuildItemValues()

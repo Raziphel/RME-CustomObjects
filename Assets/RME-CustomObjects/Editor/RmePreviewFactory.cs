@@ -15,6 +15,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (existing != null) Object.DestroyImmediate(existing.gameObject);
             GameObject preview = block.Kind switch
             {
+                RmeBlockKind.Primitive => Shape(block.PrimitiveType, "Primitive preview", Vector3.one, block.Color),
                 RmeBlockKind.Light => LightPreview(block),
                 RmeBlockKind.Pickup => Box("Pickup preview", new Vector3(.3f, .12f, .5f), new Color(.25f, .7f, 1f)),
                 RmeBlockKind.Workstation => Box("Workstation preview", new Vector3(1.2f, 1.5f, .7f), new Color(.25f, .45f, .65f)),
@@ -106,6 +107,17 @@ namespace RazisRealm.RmeCustomObjects.Editor
             {
                 Material material = new Material(Shader.Find("Standard"));
                 material.color = color;
+                if (color.a < 1f)
+                {
+                    material.SetFloat("_Mode", 3f);
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_ZWrite", 0);
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                }
                 renderer.sharedMaterial = material;
             }
             return value;
