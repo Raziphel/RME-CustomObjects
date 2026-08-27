@@ -42,6 +42,7 @@ namespace RazisRealm.RmeCustomObjects
         [Range(0f, 179f)] public float SpotAngle = 30f;
         [Range(0f, 179f)] public float InnerSpotAngle = 21.80208f;
         [TextArea] public string Text;
+        public Vector2 TextDisplaySize = Vector2.one;
         public string NestedObjectName;
     }
 }

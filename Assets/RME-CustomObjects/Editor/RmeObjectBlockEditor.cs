@@ -90,7 +90,12 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("IsInteractable"));
             if (kind == RmeBlockKind.Interactable)
                 EditorGUILayout.HelpBox("An Interaction Trigger is an invisible clickable volume for scripted map interactions. It does not create a door.", MessageType.None);
-            if (kind == RmeBlockKind.Text) EditorGUILayout.PropertyField(serializedObject.FindProperty("Text"));
+            if (kind == RmeBlockKind.Text)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("Text"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("TextDisplaySize"),
+                    new GUIContent("Display Size"));
+            }
             if (kind == RmeBlockKind.NestedObject) EditorGUILayout.PropertyField(serializedObject.FindProperty("NestedObjectName"));
             if (serializedObject.ApplyModifiedProperties()) RebuildTargets();
             if (GUILayout.Button("Rebuild Scene Preview")) RebuildTargets();

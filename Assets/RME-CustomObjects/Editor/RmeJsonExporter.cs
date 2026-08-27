@@ -74,7 +74,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 case RmeBlockKind.NestedObject: Add("Prefab", Q(block.NestedObjectName)); break;
                 case RmeBlockKind.Locker:
                     Add("LockerType", block.LockerType.ToString()); Add("Chance", F(block.Chance)); Add("OpenedChambers", "0"); Add("KeycardPermissions", block.RequiredPermissions.ToString()); break;
-                case RmeBlockKind.Text: Add("Text", Q(block.Text)); break;
+                case RmeBlockKind.Text:
+                    Add("Text", Q(block.Text)); Add("DisplaySize", V(block.TextDisplaySize)); break;
                 case RmeBlockKind.Interactable: Add("IsLocked", B(block.IsLocked)); Add("InteractionDuration", "0"); Add("Shape", "0"); break;
                 case RmeBlockKind.Door:
                     Add("DoorType", "1"); DoorProperties(block, Add); break;
@@ -92,6 +93,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
         }
 
         private static string V(Vector3 value) => $"{{\"x\":{F(value.x)},\"y\":{F(value.y)},\"z\":{F(value.z)}}}";
+        private static string V(Vector2 value) => $"{{\"x\":{F(value.x)},\"y\":{F(value.y)}}}";
         private static bool Finite(Vector3 value) => !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
             !float.IsNaN(value.y) && !float.IsInfinity(value.y) && !float.IsNaN(value.z) && !float.IsInfinity(value.z);
         private static string F(float value) => value.ToString("R", CultureInfo.InvariantCulture);
