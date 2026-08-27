@@ -52,6 +52,16 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (block.Kind == RmeBlockKind.Primitive && !RmeBlockCompatibility.PrimitiveVisible(block))
                 foreach (Renderer renderer in preview.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
+            if (block.Kind == RmeBlockKind.Primitive)
+            {
+                Mesh mesh = preview.GetComponent<MeshFilter>()?.sharedMesh;
+                if (mesh != null)
+                {
+                    MeshCollider selectionCollider = block.gameObject.AddComponent<MeshCollider>();
+                    selectionCollider.sharedMesh = mesh;
+                    selectionCollider.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInBuild;
+                }
+            }
             EditorUtility.SetDirty(block.gameObject);
         }
 
