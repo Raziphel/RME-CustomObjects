@@ -22,6 +22,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
                         Rebuild(block);
                         continue;
                     }
+                    if (block.Kind == RmeBlockKind.Light && block.GetComponent<Light>() == null)
+                    {
+                        Rebuild(block);
+                        continue;
+                    }
                     Transform preview = block.transform.Find(PreviewName);
                     if (preview != null)
                         preview.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
@@ -33,6 +38,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
         internal static void Rebuild(RmeObjectBlock block)
         {
             if (block == null) return;
+            foreach (Light light in block.GetComponents<Light>()) Object.DestroyImmediate(light);
             if (block.Kind == RmeBlockKind.Primitive)
                 RemoveLegacyPrimitiveComponents(block.gameObject);
             Transform existing = block.transform.Find(PreviewName);
@@ -58,11 +64,40 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorUtility.SetDirty(block.gameObject);
                 return;
             }
+            if (block.Kind == RmeBlockKind.Light)
+            {
+                ApplyLightComponent(block);
+                Object.DestroyImmediate(preview);
+                EditorUtility.SetDirty(block.gameObject);
+                return;
+            }
             preview.name = PreviewName;
             preview.transform.SetParent(block.transform, false);
             preview.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
             foreach (Collider collider in preview.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
             EditorUtility.SetDirty(block.gameObject);
+        }
+
+        private static void ApplyLightComponent(RmeObjectBlock block)
+        {
+            Light light = block.gameObject.AddComponent<Light>();
+            int serializedType = (int)block.LightType;
+            if (serializedType < (int)RmeLightType.Spot || serializedType > (int)RmeLightType.Disc)
+            {
+                block.LightType = RmeLightType.Point;
+                block.LightShape = RmeLightShape.Cone;
+                EditorUtility.SetDirty(block);
+            }
+            light.type = (LightType)(int)block.LightType;
+            light.color = block.Color;
+            light.intensity = Mathf.Max(0f, block.LightIntensity);
+            light.range = Mathf.Max(0f, block.LightRange);
+            light.spotAngle = Mathf.Clamp(block.SpotAngle, 0f, 179f);
+            light.innerSpotAngle = Mathf.Clamp(block.InnerSpotAngle, 0f, light.spotAngle);
+            light.shadows = block.LightShadows;
+            light.shadowStrength = Mathf.Clamp01(block.LightShadowStrength);
+            light.areaSize = Vector2.one;
+            light.hideFlags = HideFlags.DontSaveInBuild;
         }
 
         private static void ApplyPrimitiveComponents(RmeObjectBlock block, GameObject preview)
