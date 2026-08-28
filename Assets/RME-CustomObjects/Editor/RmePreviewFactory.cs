@@ -17,6 +17,12 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 foreach (RmeObjectBlock block in Resources.FindObjectsOfTypeAll<RmeObjectBlock>())
                 {
                     if (!block.gameObject.scene.IsValid() || !block.gameObject.scene.isLoaded) continue;
+                    if (block.Kind == RmeBlockKind.Prefab &&
+                        (block.PrefabName?.IndexOf("CameraToy", System.StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                    {
+                        Rebuild(block);
+                        continue;
+                    }
                     if (block.Kind == RmeBlockKind.Primitive && block.GetComponent<MeshRenderer>() == null)
                     {
                         Rebuild(block);
@@ -173,7 +179,17 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (instance == null) return null;
             bool hasGeometry = instance.GetComponentsInChildren<MeshFilter>(true).Any(value => value.sharedMesh != null) ||
                 instance.GetComponentsInChildren<SkinnedMeshRenderer>(true).Any(value => value.sharedMesh != null);
-            if (hasGeometry) return instance;
+            if (hasGeometry)
+            {
+                // RealmPlugin replaces the spawned prefab root pose with the RME
+                // block pose. Imported assets such as LCZ/SZ cameras contain a
+                // baked 180-degree root rotation, so retaining it in the preview
+                // makes the editor disagree with the exported in-game result.
+                instance.transform.localPosition = Vector3.zero;
+                instance.transform.localRotation = Quaternion.identity;
+                instance.transform.localScale = Vector3.one;
+                return instance;
+            }
             Object.DestroyImmediate(instance);
             return null;
         }
