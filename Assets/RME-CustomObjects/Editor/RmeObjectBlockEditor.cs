@@ -114,7 +114,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
                     new GUIContent("Display Size"));
             }
             if (kind == RmeBlockKind.NestedObject) EditorGUILayout.PropertyField(serializedObject.FindProperty("NestedObjectName"));
-            if (serializedObject.ApplyModifiedProperties()) RebuildTargets();
+            bool changed = serializedObject.ApplyModifiedProperties();
+            if (changed) RebuildTargets();
+            else
+                foreach (Object value in targets)
+                    RmePreviewFactory.RefreshLight(value as RmeObjectBlock);
             if (GUILayout.Button("Rebuild Scene Preview")) RebuildTargets();
         }
 
@@ -129,7 +133,9 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (block == null || block.Kind != RmeBlockKind.Primitive ||
                 RmeBlockCompatibility.PrimitiveVisible(block) && block.Color.a > .001f) return;
             Transform preview = block.transform.Find(RmePreviewFactory.PreviewName);
-            MeshFilter filter = preview == null ? null : preview.GetComponentInChildren<MeshFilter>();
+            MeshFilter filter = preview == null
+                ? block.GetComponent<MeshFilter>()
+                : preview.GetComponentInChildren<MeshFilter>();
             if (filter == null || filter.sharedMesh == null) return;
             Gizmos.color = new Color(.2f, .85f, 1f, .9f);
             Gizmos.matrix = filter.transform.localToWorldMatrix;
