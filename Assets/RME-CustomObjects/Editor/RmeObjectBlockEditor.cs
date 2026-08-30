@@ -118,7 +118,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (changed) RebuildTargets();
             else
                 foreach (Object value in targets)
-                    RmePreviewFactory.RefreshLight(value as RmeObjectBlock);
+                    RmePreviewFactory.CaptureLight(value as RmeObjectBlock);
             if (GUILayout.Button("Rebuild Scene Preview")) RebuildTargets();
         }
 
