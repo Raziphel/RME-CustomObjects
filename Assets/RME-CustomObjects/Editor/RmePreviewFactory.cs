@@ -84,6 +84,18 @@ namespace RazisRealm.RmeCustomObjects.Editor
             EditorUtility.SetDirty(block.gameObject);
         }
 
+        internal static void RefreshLight(RmeObjectBlock block)
+        {
+            if (block == null || block.Kind != RmeBlockKind.Light) return;
+            Light light = block.GetComponent<Light>();
+            if (light == null) return;
+            light.range = Mathf.Max(0f, block.LightRange);
+            light.intensity = Mathf.Max(0f, block.LightIntensity);
+            light.color = block.Color;
+            light.spotAngle = Mathf.Clamp(block.SpotAngle, 0f, 179f);
+            light.innerSpotAngle = Mathf.Clamp(block.InnerSpotAngle, 0f, light.spotAngle);
+        }
+
         private static void ApplyLightComponent(RmeObjectBlock block)
         {
             Light light = block.gameObject.AddComponent<Light>();
