@@ -59,6 +59,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
                                 (RmeBlockCompatibility.PrimitiveCollidable(block) ? RmeBlockCompatibility.CollidableFlag : 0);
                     Add("PrimitiveType", ((int)block.PrimitiveType).ToString()); Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color))); Add("PrimitiveFlags", flags.ToString()); break;
                 case RmeBlockKind.Light:
+                    RmePreviewFactory.CaptureLight(block, false);
                     Add("Color", Q("#" + ColorUtility.ToHtmlStringRGBA(block.Color)));
                     Add("Intensity", F(Mathf.Clamp(block.LightIntensity, 0f, 100f)));
                     Add("Range", F(Mathf.Clamp(block.LightRange, 0f, 500f)));

@@ -84,16 +84,38 @@ namespace RazisRealm.RmeCustomObjects.Editor
             EditorUtility.SetDirty(block.gameObject);
         }
 
-        internal static void RefreshLight(RmeObjectBlock block)
+        internal static bool CaptureLight(RmeObjectBlock block, bool recordUndo = true)
         {
-            if (block == null || block.Kind != RmeBlockKind.Light) return;
+            if (block == null || block.Kind != RmeBlockKind.Light) return false;
             Light light = block.GetComponent<Light>();
-            if (light == null) return;
-            light.range = Mathf.Max(0f, block.LightRange);
-            light.intensity = Mathf.Max(0f, block.LightIntensity);
-            light.color = block.Color;
-            light.spotAngle = Mathf.Clamp(block.SpotAngle, 0f, 179f);
-            light.innerSpotAngle = Mathf.Clamp(block.InnerSpotAngle, 0f, light.spotAngle);
+            if (light == null) return false;
+
+            RmeLightType type = (RmeLightType)(int)light.type;
+            float intensity = Mathf.Max(0f, light.intensity);
+            float range = Mathf.Max(0f, light.range);
+            float spotAngle = Mathf.Clamp(light.spotAngle, 0f, 179f);
+            float innerSpotAngle = Mathf.Clamp(light.innerSpotAngle, 0f, spotAngle);
+            float shadowStrength = Mathf.Clamp01(light.shadowStrength);
+            bool changed = block.LightType != type || block.Color != light.color ||
+                !Mathf.Approximately(block.LightIntensity, intensity) ||
+                !Mathf.Approximately(block.LightRange, range) ||
+                !Mathf.Approximately(block.SpotAngle, spotAngle) ||
+                !Mathf.Approximately(block.InnerSpotAngle, innerSpotAngle) ||
+                block.LightShadows != light.shadows ||
+                !Mathf.Approximately(block.LightShadowStrength, shadowStrength);
+            if (!changed) return false;
+
+            if (recordUndo) Undo.RecordObject(block, "Sync RME light values");
+            block.LightType = type;
+            block.Color = light.color;
+            block.LightIntensity = intensity;
+            block.LightRange = range;
+            block.SpotAngle = spotAngle;
+            block.InnerSpotAngle = innerSpotAngle;
+            block.LightShadows = light.shadows;
+            block.LightShadowStrength = shadowStrength;
+            EditorUtility.SetDirty(block);
+            return true;
         }
 
         private static void ApplyLightComponent(RmeObjectBlock block)
