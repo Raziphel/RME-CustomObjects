@@ -20,7 +20,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
             "MiscLocker", "Pipes Long Open Connector", "Pipes Short Open Connector", "RegularMedkitStructure",
             "RifleRackStructure", "Scp500PedestalStructure Variant", "Simple Boxes Open Connector",
             "Spawnable Work Station Structure", "sportTargetPrefab", "SzCameraToy",
-            "Tank-Supported Shelf Open Connector"
+            "Tank-Supported Shelf Open Connector", "ElevatorChamber", "ElevatorChamber Gates",
+            "ElevatorChamberCargo", "ElevatorChamberNuke"
         };
 
         private PrimitiveType _primitive = PrimitiveType.Cube;
