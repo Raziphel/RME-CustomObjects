@@ -245,6 +245,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private static GameObject PrefabProxy(string name)
         {
             string lower = (name ?? "").ToLowerInvariant();
+            if (lower.Contains("elevator"))
+                return Box(name, new Vector3(6.5f, 4.5f, 8f), new Color(.28f, .34f, .4f));
             if (lower.Contains("door")) return Box(name, new Vector3(2.3f, 2.8f, .18f), new Color(.22f, .3f, .38f));
             if (lower.Contains("locker") || lower.Contains("rack") || lower.Contains("medkit") || lower.Contains("pedestal"))
                 return Box(name, new Vector3(1.5f, 2f, .65f), new Color(.36f, .42f, .48f));
