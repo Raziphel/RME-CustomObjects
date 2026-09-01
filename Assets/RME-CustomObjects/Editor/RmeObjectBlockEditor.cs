@@ -41,7 +41,24 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (kind == RmeBlockKind.Primitive)
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("PrimitiveType"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("Color"));
+                SerializedProperty customRgb = serializedObject.FindProperty("UseCustomRgb");
+                if (customRgb == null)
+                    EditorGUILayout.HelpBox("RME Runtime scripts are out of date. Update the complete Runtime folder to use Custom RGB.", MessageType.Error);
+                else
+                {
+                    EditorGUILayout.PropertyField(customRgb, new GUIContent("Custom RGB"));
+                    if (customRgb.boolValue)
+                    {
+                        EditorGUI.indentLevel++;
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("CustomRed"), new GUIContent("Red"));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("CustomGreen"), new GUIContent("Green"));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("CustomBlue"), new GUIContent("Blue"));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("CustomAlpha"), new GUIContent("Alpha"));
+                        EditorGUI.indentLevel--;
+                        EditorGUILayout.HelpBox("RGB channels are raw MER values: 255 is normal intensity, values above 255 can glow with bloom, and negative values are supported. Alpha is normally 0 to 1.", MessageType.Info);
+                    }
+                    else EditorGUILayout.PropertyField(serializedObject.FindProperty("Color"));
+                }
                 SerializedProperty visible = serializedObject.FindProperty("PrimitiveVisible");
                 SerializedProperty collidable = serializedObject.FindProperty("PrimitiveCollidable");
                 if (visible != null && collidable != null)
@@ -131,7 +148,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private static void DrawInvisiblePrimitive(RmeObjectBlock block, GizmoType gizmoType)
         {
             if (block == null || block.Kind != RmeBlockKind.Primitive ||
-                RmeBlockCompatibility.PrimitiveVisible(block) && block.Color.a > .001f) return;
+                RmeBlockCompatibility.PrimitiveVisible(block) &&
+                RmeBlockCompatibility.PreviewColor(block).a > .001f) return;
             Transform preview = block.transform.Find(RmePreviewFactory.PreviewName);
             MeshFilter filter = preview == null
                 ? block.GetComponent<MeshFilter>()

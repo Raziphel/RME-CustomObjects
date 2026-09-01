@@ -20,12 +20,17 @@ namespace RazisRealm.RmeCustomObjects
     [SelectionBase]
     public sealed class RmeObjectBlock : MonoBehaviour
     {
-        public const int EditorSchemaVersion = 2;
+        public const int EditorSchemaVersion = 3;
         [HideInInspector] public int ObjectId;
         public RmeBlockKind Kind = RmeBlockKind.Primitive;
         public string PrefabName;
         public PrimitiveType PrimitiveType = PrimitiveType.Cube;
         public Color Color = Color.white;
+        public bool UseCustomRgb;
+        public int CustomRed = 255;
+        public int CustomGreen = 255;
+        public int CustomBlue = 255;
+        public float CustomAlpha = 1f;
         public bool PrimitiveVisible = true;
         public bool PrimitiveCollidable = true;
         public string CameraLabel = "CustomCamera";

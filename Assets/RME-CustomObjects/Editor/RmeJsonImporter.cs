@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -98,8 +99,18 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 (properties.PrimitiveFlags & RmeBlockCompatibility.VisibleFlag) != 0);
             RmeBlockCompatibility.SetPrimitiveCollidable(block,
                 (properties.PrimitiveFlags & RmeBlockCompatibility.CollidableFlag) != 0);
-            if (!string.IsNullOrWhiteSpace(properties.Color) &&
-                ColorUtility.TryParseHtmlString(properties.Color, out Color color)) block.Color = color;
+            if (!string.IsNullOrWhiteSpace(properties.Color))
+            {
+                string[] channels = properties.Color.Split(':');
+                if (channels.Length == 4 &&
+                    int.TryParse(channels[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int red) &&
+                    int.TryParse(channels[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int green) &&
+                    int.TryParse(channels[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int blue) &&
+                    float.TryParse(channels[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float alpha) &&
+                    !float.IsNaN(alpha) && !float.IsInfinity(alpha))
+                    RmeBlockCompatibility.SetCustomRgb(block, red, green, blue, alpha);
+                else if (ColorUtility.TryParseHtmlString(properties.Color, out Color color)) block.Color = color;
+            }
             block.PrefabName = properties.PrefabName;
             RmeBlockCompatibility.SetCameraLabel(block,
                 string.IsNullOrWhiteSpace(properties.CameraLabel) ? "CustomCamera" : properties.CameraLabel);
