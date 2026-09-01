@@ -51,7 +51,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (existing != null) Object.DestroyImmediate(existing.gameObject);
             GameObject preview = block.Kind switch
             {
-                RmeBlockKind.Primitive => Shape(block.PrimitiveType, "Primitive preview", Vector3.one, block.Color),
+                RmeBlockKind.Primitive => Shape(block.PrimitiveType, "Primitive preview", Vector3.one,
+                    RmeBlockCompatibility.PreviewColor(block)),
                 RmeBlockKind.Light => LightPreview(block),
                 RmeBlockKind.Pickup => Box("Pickup preview", new Vector3(.3f, .12f, .5f), new Color(.25f, .7f, 1f)),
                 RmeBlockKind.Workstation => Box("Workstation preview", new Vector3(1.2f, 1.5f, .7f), new Color(.25f, .45f, .65f)),
@@ -269,6 +270,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
             {
                 Material material = new Material(Shader.Find("Standard"));
                 material.color = color;
+                if (Mathf.Max(color.r, Mathf.Max(color.g, color.b)) > 1f)
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", color);
+                }
                 if (color.a < 1f)
                 {
                     material.SetFloat("_Mode", 2f);
