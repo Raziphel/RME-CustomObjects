@@ -19,3 +19,14 @@ MemoryCaptures/
 *.opendb
 *.VC.db
 sysinfo.txt
+
+# Local AI / coding-agent artifacts (shared instructions such as AGENTS.md remain tracked)
+.codex/
+.claude/
+.cursor/
+.continue/
+.chatgpt/
+.gemini/
+.ai/
+.aider*
+*.ai.log
