@@ -1,0 +1,15 @@
+{
+  "project": {
+    "exclude": [
+      ".git", ".flowseeker", ".vs", ".vscode", ".idea",
+      ".codex", ".claude", ".cursor", ".continue", ".chatgpt", ".gemini", ".ai",
+      "Library", "Temp", "Obj", "Build", "Builds", "Logs", "UserSettings", "MemoryCaptures",
+      "library", "temp", "obj", "build", "builds", "logs", "bin", "dist", "out", "coverage", "test-results", "TestResults",
+      "node_modules", "vendor", ".gradle", ".dart_tool", ".venv", "venv", "__pycache__", ".pytest_cache", ".mypy_cache",
+      "**/*.dll", "**/*.pdb", "**/*.exe", "**/*.so", "**/*.dylib", "**/*.pyc", "**/*.pyo",
+      "**/*.log", "**/*.tmp", "**/*.bak", "*.csproj", "*.sln", "*.user", "*.pidb", "*.booproj", "*.svd", "*.mdb", "*.opendb", "*.VC.db", "sysinfo.txt", ".DS_Store", ".directory",
+      ".env", ".env.local", ".env.*.local",
+      "repomix-output.*", "**/repomix-output.*", "*.ai.log"
+    ]
+  }
+}
