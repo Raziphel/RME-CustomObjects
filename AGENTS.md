@@ -1,26 +1,12 @@
-# RME-CustomObjects agent guide
+# RME-CustomObjects
 
-RME-CustomObjects is a Unity 2021.3.17f1 authoring kit for reusable Realm Map Editor objects and compatible JSON exports. C# editor/runtime tooling previews, imports, edits, and exports ProjectMER-style blocks; Python utilities validate project metadata and object files.
+Unity 2021.3.17f1 authoring kit for reusable Realm Map Editor objects and JSON exports. Editor tooling is in `Assets/RME-CustomObjects/Editor/`; serialized types in `Runtime/`; formats in `schema/` and `catalog/`; validators in `tools/`. Preserve `.meta` files/GUIDs and compatibility (`FormerlySerializedAs` for unavoidable renames).
 
-## Map and conventions
+| Request | Start here |
+|---|---|
+| Editor/import/export | `Editor/RmeCustomObjectBuilder.cs`, `RmeJsonImporter.cs`, `RmeJsonExporter.cs` |
+| Block/runtime schema | `Runtime/RmeObjectBlock.cs`, `RmeCustomObjectRoot.cs` |
+| Preview/inspector | `Editor/RmePreviewFactory.cs`, `RmeObjectBlockEditor.cs` |
+| JSON/prefab validity | `schema/`, `catalog/`, `tools/validate.py` |
 
-- `Assets/RME-CustomObjects/Editor/`: builder window, inspectors, previews, JSON import/export.
-- `Assets/RME-CustomObjects/Runtime/`: serialized component/schema types shared by editor code.
-- `schema/`: JSON schema; `catalog/`: supported SCP:SL prefab names; `examples/`: sample exports.
-- `tools/validate.py`: project/object validation; `tools/new_prefab.py`: generic-prefab JSON helper.
-- `Packages/manifest.json` and `ProjectSettings/ProjectVersion.txt`: Unity dependencies/version.
-- `Assets/RME-CustomObjects/Prefabs/RRP/` and imported reference assets: large Unity descriptors/assets; inspect only for prefab/asset tasks.
-
-Preserve every Unity `.meta` file and pinned GUID. Keep Runtime and Editor schemas synchronized; add serialized fields compatibly and use `FormerlySerializedAs` for unavoidable renames. Exported JSON and catalog/schema formats are contracts with sibling `RealmPlugin`, which performs server-side placement. There is no database or deployable server code here.
-
-## Validation and runtime
-
-- Project metadata/schema: `python3 tools/validate.py --project`
-- One object: `python3 tools/validate.py path/to/object.json`
-- Finish with: `git diff --check`
-
-Unity editor/compiler behavior requires opening the project in Unity 2021.3.17f1 and refreshing/recompiling; Python validation alone does not prove inspector, preview, import, or export behavior.
-
-## Token discipline
-
-Use `flowseeker-rme` first for targeted code discovery. If it is insufficient, use targeted symbol/`rg` searches in the relevant Editor, Runtime, tool, or schema path. Read only relevant sections and direct dependencies; never inventory `Assets/`, reread unchanged files, or explore siblings unless an export/runtime contract changes. Prefer existing compatibility/export helpers; avoid parallel implementations, unrelated refactors, formatting, cleanup, and documentation churn. Skip `Library/`, `Temp/`, `Logs/`, `Obj/`, `Build*/`, `UserSettings/`, `MemoryCaptures/`, generated IDE projects, binaries, dependencies/package caches, secrets, and unrelated assets/docs unless required. Run the smallest validator before Unity-wide checks.
+Exports are consumed by `../RealmPlugin/`; keep Runtime, Editor, schema, and catalog compatible. Use `flowseeker-rme` before targeted `rg`; never inventory `Assets/`, and skip `Library/`, `Temp/`, `Logs/`, builds, generated IDE projects, caches, and imported assets unless necessary. Run `python3 tools/validate.py --project` or the relevant object validator, then `git diff --check`. Unity editor behavior still needs Unity refresh/recompile.

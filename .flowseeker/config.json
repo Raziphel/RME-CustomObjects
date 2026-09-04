@@ -2,7 +2,7 @@
   "project": {
     "exclude": [
       ".git", ".flowseeker", ".vs", ".vscode", ".idea",
-      ".codex", ".claude", ".cursor", ".continue", ".chatgpt", ".gemini", ".ai",
+      ".codex", ".claude", ".cursor", ".continue", ".chatgpt", ".gemini", ".ai", ".context",
       "Library", "Temp", "Obj", "Build", "Builds", "Logs", "UserSettings", "MemoryCaptures",
       "library", "temp", "obj", "build", "builds", "logs", "bin", "dist", "out", "coverage", "test-results", "TestResults",
       "node_modules", "vendor", ".gradle", ".dart_tool", ".venv", "venv", "__pycache__", ".pytest_cache", ".mypy_cache",
@@ -11,5 +11,23 @@
       ".env", ".env.local", ".env.*.local",
       "repomix-output.*", "**/repomix-output.*", "*.ai.log"
     ]
+  },
+  "index": {
+    "chunkSizeLines": 60,
+    "chunkOverlapLines": 8,
+    "maxSeedCandidateFiles": 100,
+    "maxDependencyExpansionFiles": 140,
+    "maxIndexedCandidateFiles": 350
+  },
+  "pipeline": {
+    "maxCandidates": 20,
+    "maxContextTokens": 2800,
+    "maxRawEvidence": 400,
+    "maxFiles": 1800
+  },
+  "synonyms": {
+    "custom object": ["rme", "block", "prefab", "json export"],
+    "editor": ["builder", "inspector", "preview", "importer", "exporter"],
+    "schema": ["catalog", "prefabs", "runtime", "serialized"]
   }
 }
