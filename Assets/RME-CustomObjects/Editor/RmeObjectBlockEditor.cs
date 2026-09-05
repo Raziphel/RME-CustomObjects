@@ -71,7 +71,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Animation", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("AnimatorName"), new GUIContent("Animator Bundle"));
-                EditorGUILayout.HelpBox("Optional. Enter an AssetBundle file name containing a RuntimeAnimatorController, then place that file beside the exported JSON on the server. Leave this empty when using procedural motion.", MessageType.None);
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("AnimatorController"), new GUIContent("Animator Controller"));
+                EditorGUILayout.HelpBox("Assign an Animator Controller asset and a bundle file name. RME builds this bundle alongside the JSON when you export. Leave both empty when using procedural motion.", MessageType.None);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionOffset"), new GUIContent("Move Offset"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionRotation"), new GUIContent("Rotate By"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionDuration"), new GUIContent("Motion Duration"));
