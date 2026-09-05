@@ -25,7 +25,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
         };
 
         private PrimitiveType _primitive = PrimitiveType.Cube;
-        private BuildTarget _animationBuildTarget = BuildTarget.StandaloneLinux64;
+        private static BuildTarget _animationBuildTarget = BuildTarget.StandaloneLinux64;
         private string _search = "";
         private Vector2 _prefabScroll;
 
@@ -255,7 +255,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             catch (Exception exception) { Debug.LogError("[RME Custom Objects] Export failed: " + exception.Message); }
         }
 
-        private int ExportAnimatorBundles(RmeCustomObjectRoot root, string outputDirectory)
+        private static int ExportAnimatorBundles(RmeCustomObjectRoot root, string outputDirectory)
         {
             RmeObjectBlock[] animated = root.GetComponentsInChildren<RmeObjectBlock>(true)
                 .Where(block => !string.IsNullOrWhiteSpace(block.AnimatorName)).ToArray();
