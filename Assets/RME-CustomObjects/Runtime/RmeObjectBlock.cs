@@ -16,11 +16,13 @@ namespace RazisRealm.RmeCustomObjects
 
     public enum RmeLightShape { Cone = 0 }
 
+    public enum RmeMotionLoopMode { Loop = 1, PingPong = 2 }
+
     [DisallowMultipleComponent]
     [SelectionBase]
     public sealed class RmeObjectBlock : MonoBehaviour
     {
-        public const int EditorSchemaVersion = 3;
+        public const int EditorSchemaVersion = 4;
         [HideInInspector] public int ObjectId;
         public RmeBlockKind Kind = RmeBlockKind.Primitive;
         public string PrefabName;
@@ -33,6 +35,11 @@ namespace RazisRealm.RmeCustomObjects
         public float CustomAlpha = 1f;
         public bool PrimitiveVisible = true;
         public bool PrimitiveCollidable = true;
+        public string AnimatorName;
+        public Vector3 MotionOffset;
+        public Vector3 MotionRotation;
+        [Min(0f)] public float MotionDuration;
+        public RmeMotionLoopMode MotionLoopMode = RmeMotionLoopMode.PingPong;
         public string CameraLabel = "CustomCamera";
         public bool IsOpen;
         public bool IsLocked;

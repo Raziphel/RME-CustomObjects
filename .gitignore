@@ -5,12 +5,19 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
-MemoryCaptures/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+.gradle/
+
+# Generated IDE and Unity project files
 .vs/
+.vscode/
 .idea/
 *.csproj
 *.sln
+*.unityproj
 *.user
+*.userprefs
 *.pidb
 *.booproj
 *.svd
@@ -19,3 +26,45 @@ MemoryCaptures/
 *.opendb
 *.VC.db
 sysinfo.txt
+crashlytics-build.properties
+
+# Python tooling, logs, and temporary files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.log
+*.tmp
+*.bak
+*.swp
+.directory
+.DS_Store
+Thumbs.db
+
+# Local secrets and credentials; keep safe templates tracked
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Generated tooling output
+repomix-output.*
+.flowseeker/*
+!.flowseeker/config.json
+
+# Local AI / coding-agent artifacts (shared instructions such as AGENTS.md remain tracked)
+.codex/
+.claude/
+.cursor/
+.continue/
+.chatgpt/
+.gemini/
+.ai/
+.aider*
+*.ai.log

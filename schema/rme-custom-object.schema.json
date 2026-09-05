@@ -26,6 +26,8 @@
       "properties": {
         "Name": { "type": "string" }, "ObjectId": { "type": "integer" }, "ParentId": { "type": "integer" },
         "AnimatorName": { "type": ["string", "null"] }, "Position": { "$ref": "#/$defs/vector" },
+        "MotionOffset": { "$ref": "#/$defs/vector" }, "MotionRotation": { "$ref": "#/$defs/vector" },
+        "MotionDuration": { "type": "number", "exclusiveMinimum": 0 }, "MotionLoopMode": { "enum": [1, 2] },
         "Rotation": { "$ref": "#/$defs/vector" }, "Scale": { "$ref": "#/$defs/vector" },
         "BlockType": { "type": "integer", "minimum": 0, "maximum": 12 }, "Properties": { "type": "object" }
       }

@@ -68,6 +68,15 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 }
                 else EditorGUILayout.HelpBox("RME Runtime scripts are out of date. Update the complete Runtime folder to edit visibility and collision.", MessageType.Error);
                 EditorGUILayout.HelpBox("Visible and Collidable are independent MER-compatible primitive flags. Invisible colliders remain selectable through their hierarchy entry.", MessageType.Info);
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Animation", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("AnimatorName"), new GUIContent("Animator Bundle"));
+                EditorGUILayout.HelpBox("Optional. Enter an AssetBundle file name containing a RuntimeAnimatorController, then place that file beside the exported JSON on the server. Leave this empty when using procedural motion.", MessageType.None);
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionOffset"), new GUIContent("Move Offset"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionRotation"), new GUIContent("Rotate By"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionDuration"), new GUIContent("Motion Duration"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionLoopMode"), new GUIContent("Motion Loop"));
+                EditorGUILayout.HelpBox("A duration greater than zero moves this primitive from its starting transform by the configured offset and rotation. PingPong returns to the start; Loop resets at the end. Procedural motion and an Animator Bundle cannot be used on the same primitive.", MessageType.None);
             }
             if (kind == RmeBlockKind.Pickup)
             {
