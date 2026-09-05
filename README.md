@@ -68,6 +68,8 @@ Existing ProjectMER block types remain compatible. RME extensions are generic pr
 | 11 | Door | `DoorType`, `IsOpen`, `IsLocked`, permissions |
 | 12 | Any registered network prefab | `PrefabName`, plus door properties when applicable |
 
+Primitive blocks can move without a custom Unity AssetBundle: set **Move Offset**, optional **Rotate By**, and **Motion Duration**. PingPong travels out and back; Loop restarts at the initial transform. This is server-driven, so moving collidable primitives retain their authoritative collider. A primitive may instead name an **Animator Bundle**; place the matching AssetBundle containing a `RuntimeAnimatorController` beside the JSON on the server. Do not combine the two motion methods on one primitive.
+
 Positions, Euler rotations, scales, parent IDs, rigidbodies, and animator names are serialized unchanged. The root ID is a virtual map-placement anchor and must not also be used as a visible block.
 
 See `examples/supply-locker.json`. The schema is in `schema/rme-custom-object.schema.json`.

@@ -94,6 +94,12 @@ namespace RazisRealm.RmeCustomObjects.Editor
             ImportProperties properties = definition.Properties ?? new ImportProperties();
             block.ObjectId = definition.ObjectId;
             block.Kind = (RmeBlockKind)definition.BlockType;
+            block.AnimatorName = definition.AnimatorName;
+            block.MotionOffset = definition.MotionOffset;
+            block.MotionRotation = definition.MotionRotation;
+            block.MotionDuration = Mathf.Max(0f, definition.MotionDuration);
+            block.MotionLoopMode = System.Enum.IsDefined(typeof(RmeMotionLoopMode), definition.MotionLoopMode)
+                ? (RmeMotionLoopMode)definition.MotionLoopMode : RmeMotionLoopMode.PingPong;
             block.PrimitiveType = (PrimitiveType)properties.PrimitiveType;
             RmeBlockCompatibility.SetPrimitiveVisible(block,
                 (properties.PrimitiveFlags & RmeBlockCompatibility.VisibleFlag) != 0);
@@ -151,6 +157,11 @@ namespace RazisRealm.RmeCustomObjects.Editor
             public string Name;
             public int ObjectId;
             public int ParentId;
+            public string AnimatorName;
+            public Vector3 MotionOffset;
+            public Vector3 MotionRotation;
+            public float MotionDuration;
+            public int MotionLoopMode = (int)RmeMotionLoopMode.PingPong;
             public Vector3 Position;
             public Vector3 Rotation;
             public Vector3 Scale = Vector3.one;

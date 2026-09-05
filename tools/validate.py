@@ -32,7 +32,7 @@ def validate_script_metadata():
     missing = set(EXPECTED_SCRIPT_GUIDS) - {path.as_posix() for path in guids.values()}
     if missing: fail(f"pinned Unity scripts are missing: {', '.join(sorted(missing))}")
     block_source = (scripts / "Runtime" / "RmeObjectBlock.cs").read_text(encoding="utf-8-sig")
-    for required in ("EditorSchemaVersion = 3", "[SelectionBase]", "PrimitiveVisible", "PrimitiveCollidable", "UseCustomRgb", "CustomRed", "CustomGreen", "CustomBlue", "CustomAlpha", "CameraLabel"):
+    for required in ("EditorSchemaVersion = 4", "[SelectionBase]", "PrimitiveVisible", "PrimitiveCollidable", "UseCustomRgb", "CustomRed", "CustomGreen", "CustomBlue", "CustomAlpha", "CameraLabel", "AnimatorName", "MotionOffset", "MotionRotation", "MotionDuration"):
         if required not in block_source:
             fail(f"RmeObjectBlock runtime/editor schema mismatch: missing {required}")
     compatibility_source = (scripts / "Editor" / "RmeBlockCompatibility.cs").read_text(encoding="utf-8-sig")
@@ -65,6 +65,17 @@ def validate(path):
         ids.add(object_id); parents[object_id] = parent_id
         if block.get("BlockType") not in range(13) or block.get("BlockType") == 6: fail(f"block {object_id} has unsupported inline BlockType; teleports belong in the sidecar")
         for key in ("Position", "Rotation", "Scale"): vector(block.get(key), f"block {object_id} {key}")
+        animator = block.get("AnimatorName")
+        if animator is not None and (not isinstance(animator, str) or len(animator) > 100 or not animator or ".." in animator or "/" in animator or "\\" in animator):
+            fail(f"block {object_id} has an unsafe AnimatorName")
+        has_motion = "MotionDuration" in block
+        if has_motion:
+            if block.get("BlockType") != 1: fail(f"block {object_id} procedural motion is only supported for primitives")
+            if animator: fail(f"block {object_id} cannot combine AnimatorName with procedural motion")
+            duration = block.get("MotionDuration")
+            if not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0: fail(f"block {object_id} MotionDuration must be a positive finite number")
+            for key in ("MotionOffset", "MotionRotation"): vector(block.get(key), f"block {object_id} {key}")
+            if block.get("MotionLoopMode", 2) not in (1, 2): fail(f"block {object_id} has unsupported MotionLoopMode")
         if block.get("BlockType") == 12 and not (block.get("Properties") or {}).get("PrefabName"): fail(f"block {object_id} needs Properties.PrefabName")
     for object_id, parent_id in parents.items():
         if object_id != root and parent_id != root and parent_id not in ids: fail(f"block {object_id} has missing parent {parent_id}")

@@ -37,7 +37,26 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 output.Append("\"Name\":").Append(Q(block.name));
                 output.Append(",\"ObjectId\":").Append(ids[block.transform]);
                 output.Append(",\"ParentId\":").Append(ids[parent]);
-                output.Append(",\"AnimatorName\":null");
+                string animatorName = (block.AnimatorName ?? string.Empty).Trim();
+                if (!SafeAssetFileName(animatorName))
+                    throw new InvalidOperationException($"Block '{block.name}' has an unsafe Animator Bundle file name.");
+                bool hasMotion = block.MotionDuration > 0f;
+                if (hasMotion && !string.IsNullOrEmpty(animatorName))
+                    throw new InvalidOperationException($"Block '{block.name}' cannot use both an Animator Bundle and procedural motion.");
+                if (hasMotion && (block.Kind != RmeBlockKind.Primitive || float.IsNaN(block.MotionDuration) ||
+                                  float.IsInfinity(block.MotionDuration) ||
+                                  !System.Enum.IsDefined(typeof(RmeMotionLoopMode), block.MotionLoopMode)))
+                    throw new InvalidOperationException($"Block '{block.name}' has invalid procedural motion settings.");
+                output.Append(",\"AnimatorName\":").Append(string.IsNullOrEmpty(animatorName) ? "null" : Q(animatorName));
+                if (hasMotion)
+                {
+                    if (!Finite(block.MotionOffset) || !Finite(block.MotionRotation))
+                        throw new InvalidOperationException($"Block '{block.name}' has invalid procedural motion values.");
+                    output.Append(",\"MotionOffset\":").Append(V(block.MotionOffset));
+                    output.Append(",\"MotionRotation\":").Append(V(block.MotionRotation));
+                    output.Append(",\"MotionDuration\":").Append(F(block.MotionDuration));
+                    output.Append(",\"MotionLoopMode\":").Append((int)block.MotionLoopMode);
+                }
                 output.Append(",\"Position\":").Append(V(block.transform.localPosition));
                 output.Append(",\"Rotation\":").Append(V(block.transform.localEulerAngles));
                 output.Append(",\"Scale\":").Append(V(block.transform.localScale));
@@ -109,6 +128,9 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private static string V(Vector2 value) => $"{{\"x\":{F(value.x)},\"y\":{F(value.y)}}}";
         private static bool Finite(Vector3 value) => !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
             !float.IsNaN(value.y) && !float.IsInfinity(value.y) && !float.IsNaN(value.z) && !float.IsInfinity(value.z);
+        private static bool SafeAssetFileName(string value) => string.IsNullOrEmpty(value) ||
+            value.Length <= 100 && value.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) < 0 &&
+            !value.Contains("..") && !value.Contains("/") && !value.Contains("\\");
         private static string F(float value) => value.ToString("R", CultureInfo.InvariantCulture);
         private static string B(bool value) => value ? "true" : "false";
         private static string Q(string value) => "\"" + (value ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n") + "\"";
