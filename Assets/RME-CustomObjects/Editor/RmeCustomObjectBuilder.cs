@@ -25,6 +25,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
         };
 
         private PrimitiveType _primitive = PrimitiveType.Cube;
+        private BuildTarget _animationBuildTarget = BuildTarget.StandaloneLinux64;
         private string _search = "";
         private Vector2 _prefabScroll;
 
@@ -77,6 +78,19 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 activeRoot == null ? MessageType.Warning : MessageType.Info);
             if (GUILayout.Button("Create Custom Object Root")) CreateRoot();
             if (GUILayout.Button("Import JSON for Editing", GUILayout.Height(28))) ImportJson();
+
+            if (activeRoot != null)
+            {
+                int animated = activeRoot.GetComponentsInChildren<RmeObjectBlock>(true)
+                    .Count(block => !string.IsNullOrWhiteSpace(block.AnimatorName));
+                if (animated > 0)
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("Animation Export", EditorStyles.boldLabel);
+                    _animationBuildTarget = (BuildTarget)EditorGUILayout.EnumPopup("Server Platform", _animationBuildTarget);
+                    EditorGUILayout.HelpBox($"Export will build {animated} configured Animator Bundle(s) beside the JSON for {_animationBuildTarget}. Each animated primitive needs both an Animator Bundle name and an Animator Controller asset.", MessageType.Info);
+                }
+            }
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Primitive", EditorStyles.boldLabel);
@@ -231,13 +245,39 @@ namespace RazisRealm.RmeCustomObjects.Editor
             try
             {
                 string json = RmeJsonExporter.Export(root);
+                int bundles = ExportAnimatorBundles(root, Path.GetDirectoryName(path));
                 File.WriteAllText(path, json, new UTF8Encoding(false));
                 EditorUtility.RevealInFinder(path);
                 EditorUtility.DisplayDialog("RME Custom Object exported",
-                    $"Exported {root.ObjectName}\n\n{path}\n\nNext: copy this JSON into the server's RME CustomObjects folder, run 'rme custom reload', then place/reference '{safeName}' in the RME map.", "Done");
+                    $"Exported {root.ObjectName}\n\n{path}\n\nAnimator bundles: {bundles}\n\nCopy the JSON and any listed bundles into the same server custom-object folder, run 'rme custom reload', then place/reference '{safeName}' in the RME map.", "Done");
                 Debug.Log($"[RME Custom Objects] Exported {root.ObjectName} to {path}");
             }
             catch (Exception exception) { Debug.LogError("[RME Custom Objects] Export failed: " + exception.Message); }
+        }
+
+        private int ExportAnimatorBundles(RmeCustomObjectRoot root, string outputDirectory)
+        {
+            RmeObjectBlock[] animated = root.GetComponentsInChildren<RmeObjectBlock>(true)
+                .Where(block => !string.IsNullOrWhiteSpace(block.AnimatorName)).ToArray();
+            if (animated.Length == 0) return 0;
+            var builds = new List<AssetBundleBuild>();
+            foreach (IGrouping<string, RmeObjectBlock> group in animated.GroupBy(block => block.AnimatorName.Trim(), StringComparer.OrdinalIgnoreCase))
+            {
+                if (group.Select(block => block.AnimatorName.Trim()).Distinct(StringComparer.Ordinal).Count() != 1)
+                    throw new InvalidOperationException($"Animator Bundle '{group.Key}' uses inconsistent letter casing. Use one exact filename on every primitive.");
+                RuntimeAnimatorController[] controllers = group.Select(block => block.AnimatorController)
+                    .Where(controller => controller != null).Distinct().ToArray();
+                if (controllers.Length != 1 || group.Any(block => block.AnimatorController == null))
+                    throw new InvalidOperationException($"Animator Bundle '{group.Key}' must use one assigned Animator Controller.");
+                string controllerPath = AssetDatabase.GetAssetPath(controllers[0]);
+                if (string.IsNullOrWhiteSpace(controllerPath))
+                    throw new InvalidOperationException($"Animator Bundle '{group.Key}' references a controller outside this Unity project.");
+                builds.Add(new AssetBundleBuild { assetBundleName = group.Key, assetNames = new[] { controllerPath } });
+            }
+            if (BuildPipeline.BuildAssetBundles(outputDirectory, builds.ToArray(), BuildAssetBundleOptions.StrictMode,
+                    _animationBuildTarget) == null)
+                throw new InvalidOperationException("Unity could not build the Animator AssetBundles. Check the Console for the specific import or controller error.");
+            return builds.Count;
         }
 
         private static void ValidateSelected()

@@ -22,7 +22,7 @@ namespace RazisRealm.RmeCustomObjects
     [SelectionBase]
     public sealed class RmeObjectBlock : MonoBehaviour
     {
-        public const int EditorSchemaVersion = 4;
+        public const int EditorSchemaVersion = 5;
         [HideInInspector] public int ObjectId;
         public RmeBlockKind Kind = RmeBlockKind.Primitive;
         public string PrefabName;
@@ -36,6 +36,7 @@ namespace RazisRealm.RmeCustomObjects
         public bool PrimitiveVisible = true;
         public bool PrimitiveCollidable = true;
         public string AnimatorName;
+        public RuntimeAnimatorController AnimatorController;
         public Vector3 MotionOffset;
         public Vector3 MotionRotation;
         [Min(0f)] public float MotionDuration;
