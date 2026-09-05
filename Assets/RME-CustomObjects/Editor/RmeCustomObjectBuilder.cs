@@ -82,13 +82,13 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (activeRoot != null)
             {
                 int animated = activeRoot.GetComponentsInChildren<RmeObjectBlock>(true)
-                    .Count(block => !string.IsNullOrWhiteSpace(block.AnimatorName));
+                    .Count(block => block.AnimatorController != null || !string.IsNullOrWhiteSpace(block.AnimatorName));
                 if (animated > 0)
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Animation Export", EditorStyles.boldLabel);
                     _animationBuildTarget = (BuildTarget)EditorGUILayout.EnumPopup("Server Platform", _animationBuildTarget);
-                    EditorGUILayout.HelpBox($"Export will build {animated} configured Animator Bundle(s) beside the JSON for {_animationBuildTarget}. Each animated primitive needs both an Animator Bundle name and an Animator Controller asset.", MessageType.Info);
+                    EditorGUILayout.HelpBox($"Export will build {animated} configured Animator Bundle(s) beside the JSON for {_animationBuildTarget}. Assigning an Animator Controller is enough: RME generates the bundle filename when it is empty.", MessageType.Info);
                 }
             }
 
@@ -244,22 +244,46 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (string.IsNullOrEmpty(path)) return;
             try
             {
+                EnsureAnimatorBundleNames(root);
                 string json = RmeJsonExporter.Export(root);
-                int bundles = ExportAnimatorBundles(root, Path.GetDirectoryName(path));
+                string[] bundles = ExportAnimatorBundles(root, Path.GetDirectoryName(path));
                 File.WriteAllText(path, json, new UTF8Encoding(false));
                 EditorUtility.RevealInFinder(path);
+                string bundleList = bundles.Length == 0 ? "No Animator Bundles" : string.Join("\n", bundles);
                 EditorUtility.DisplayDialog("RME Custom Object exported",
-                    $"Exported {root.ObjectName}\n\n{path}\n\nAnimator bundles: {bundles}\n\nCopy the JSON and any listed bundles into the same server custom-object folder, run 'rme custom reload', then place/reference '{safeName}' in the RME map.", "Done");
+                    $"JSON:\n{path}\n\nAnimator bundle files:\n{bundleList}\n\nCopy the JSON and every listed bundle into the same server custom-object folder, run 'rme custom reload', then place/reference '{safeName}' in the RME map.", "Done");
                 Debug.Log($"[RME Custom Objects] Exported {root.ObjectName} to {path}");
             }
-            catch (Exception exception) { Debug.LogError("[RME Custom Objects] Export failed: " + exception.Message); }
+            catch (Exception exception)
+            {
+                Debug.LogError("[RME Custom Objects] Export failed: " + exception);
+                EditorUtility.DisplayDialog("RME export failed", exception.Message,
+                    "Close");
+            }
         }
 
-        private static int ExportAnimatorBundles(RmeCustomObjectRoot root, string outputDirectory)
+        private static void EnsureAnimatorBundleNames(RmeCustomObjectRoot root)
+        {
+            foreach (RmeObjectBlock block in root.GetComponentsInChildren<RmeObjectBlock>(true)
+                         .Where(value => value.AnimatorController != null && string.IsNullOrWhiteSpace(value.AnimatorName)))
+            {
+                string controllerPath = AssetDatabase.GetAssetPath(block.AnimatorController);
+                string guid = AssetDatabase.AssetPathToGUID(controllerPath);
+                if (string.IsNullOrWhiteSpace(controllerPath) || string.IsNullOrWhiteSpace(guid))
+                    throw new InvalidOperationException($"Block '{block.name}' references an Animator Controller outside this Unity project.");
+                string name = string.Concat(block.AnimatorController.name.Where(character => char.IsLetterOrDigit(character) || character == '-' || character == '_'));
+                if (string.IsNullOrEmpty(name)) name = "animation";
+                Undo.RecordObject(block, "Assign RME animator bundle name");
+                block.AnimatorName = $"rme-{name}-{guid.Substring(0, 8)}";
+                EditorUtility.SetDirty(block);
+            }
+        }
+
+        private static string[] ExportAnimatorBundles(RmeCustomObjectRoot root, string outputDirectory)
         {
             RmeObjectBlock[] animated = root.GetComponentsInChildren<RmeObjectBlock>(true)
                 .Where(block => !string.IsNullOrWhiteSpace(block.AnimatorName)).ToArray();
-            if (animated.Length == 0) return 0;
+            if (animated.Length == 0) return Array.Empty<string>();
             var builds = new List<AssetBundleBuild>();
             foreach (IGrouping<string, RmeObjectBlock> group in animated.GroupBy(block => block.AnimatorName.Trim(), StringComparer.OrdinalIgnoreCase))
             {
@@ -277,7 +301,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (BuildPipeline.BuildAssetBundles(outputDirectory, builds.ToArray(), BuildAssetBundleOptions.StrictMode,
                     _animationBuildTarget) == null)
                 throw new InvalidOperationException("Unity could not build the Animator AssetBundles. Check the Console for the specific import or controller error.");
-            return builds.Count;
+            return builds.Select(build => Path.Combine(outputDirectory, build.assetBundleName)).ToArray();
         }
 
         private static void ValidateSelected()
