@@ -70,9 +70,8 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.HelpBox("Visible and Collidable are independent MER-compatible primitive flags. Invisible colliders remain selectable through their hierarchy entry.", MessageType.Info);
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Animation", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("AnimatorName"), new GUIContent("Animator Bundle"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("AnimatorController"), new GUIContent("Animator Controller"));
-                EditorGUILayout.HelpBox("Assign an Animator Controller asset; RME automatically generates the bundle filename if it is empty, builds it beside the JSON, and lists its exact path after export. Set a bundle name only when multiple primitives should share one controller. Leave both empty when using procedural motion.", MessageType.None);
+                EditorGUILayout.HelpBox("Assign an Animator Controller asset. Like MER, export writes that controller and its clips to a separate animation file beside the schematic JSON, using the controller name as the filename. Leave it empty when using procedural motion.", MessageType.None);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionOffset"), new GUIContent("Move Offset"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionRotation"), new GUIContent("Rotate By"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionDuration"), new GUIContent("Motion Duration"));

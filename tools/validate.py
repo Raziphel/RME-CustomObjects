@@ -39,6 +39,12 @@ def validate_script_metadata():
     for required in ("CollidableFlag = 1", "VisibleFlag = 2"):
         if required not in compatibility_source:
             fail(f"primitive flag encoding does not match SCP:SL: missing {required}")
+    builder_source = (scripts / "Editor" / "RmeCustomObjectBuilder.cs").read_text(encoding="utf-8-sig")
+    for required in ("BuildPipeline.BuildAssetBundle", ".animationClips", "block.AnimatorName = name"):
+        if required not in builder_source:
+            fail(f"MER-compatible standalone animation export is incomplete: missing {required}")
+    if "BuildPipeline.BuildAssetBundles" in builder_source or "AssetPathToGUID" in builder_source:
+        fail("animation export must write one controller-named MER file at a time")
     invalid_hdrp_drawer = "UnityEditor.Rendering.HighDefinition"
     for shader in (PROJECT_ROOT / "Assets").rglob("*.shader"):
         if invalid_hdrp_drawer in shader.read_text(encoding="utf-8-sig", errors="ignore"):
