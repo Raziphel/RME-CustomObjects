@@ -36,7 +36,7 @@ The required visual dependencies from `SCPSL 14.1 - Rooms.unitypackage` are incl
 
 ## Install and use
 
-1. Copy a completed `<name>.json` (plus optional `<name>-Rigidbodies.json`, `<name>-Teleports.json`, and animator bundles) into the server's RME `CustomObjects/<name>/` directory.
+1. Copy a completed `<name>.json` (plus optional `<name>-Rigidbodies.json`, `<name>-Teleports.json`, and separate animation files) into the server's RME `CustomObjects/<name>/` directory.
 2. In an RME map, add a custom-object reference whose `Prefab` is `<name>`.
 3. Run `python3 tools/validate.py path/to/<name>.json` before handing the object to a server owner.
 4. Use `rme prefabs` in-game to obtain exact names for block type `12`.
@@ -68,9 +68,9 @@ Existing ProjectMER block types remain compatible. RME extensions are generic pr
 | 11 | Door | `DoorType`, `IsOpen`, `IsLocked`, permissions |
 | 12 | Any registered network prefab | `PrefabName`, plus door properties when applicable |
 
-Primitive blocks can move without a custom Unity AssetBundle: set **Move Offset**, optional **Rotate By**, and **Motion Duration**. PingPong travels out and back; Loop restarts at the initial transform. This is server-driven, so moving collidable primitives retain their authoritative collider. For full Unity animation, assign an **Animator Controller**. On export, RME generates a stable bundle filename when needed, builds that server-platform AssetBundle beside the JSON, and displays every exact output path. Set an **Animator Bundle** filename only to make multiple primitives share the same controller. Do not combine the two motion methods on one primitive.
+Primitive blocks can move without a custom Unity AssetBundle: set **Move Offset**, optional **Rotate By**, and **Motion Duration**. PingPong travels out and back; Loop restarts at the initial transform. This is server-driven, so moving collidable primitives retain their authoritative collider. For full Unity animation, assign an **Animator Controller**. Like MER, export writes the controller and its clips as a separate server-platform animation file beside the JSON, named exactly after the controller, and displays every output path. Blocks that share a controller share its animation file. Do not combine the two motion methods on one primitive.
 
-To author a controller animation, create an Animator Controller asset in Unity, add clips that animate the selected primitive's transform, and assign it in the primitive Inspector. In the builder select the server platform and export the custom object. The completion dialog gives the JSON and bundle locations; copy each listed file into the same server folder. All primitives using the same explicit bundle name must reference that same controller.
+To author a controller animation, create an Animator Controller asset in Unity, add clips that animate the selected primitive's transform, and assign it in the primitive Inspector. Give controllers safe, unique names. In the builder select the server platform and export the custom object. The completion dialog gives the schematic JSON and separate animation-file locations; copy every listed file into the same server folder.
 
 Positions, Euler rotations, scales, parent IDs, rigidbodies, and animator names are serialized unchanged. The root ID is a virtual map-placement anchor and must not also be used as a visible block.
 
