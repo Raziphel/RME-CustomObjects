@@ -80,8 +80,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
 
             if (activeRoot != null)
             {
-                int animated = activeRoot.GetComponentsInChildren<RmeObjectBlock>(true)
-                    .Count(block => ResolveAnimatorController(block) != null);
+                int animated = AnimationControllerCount(activeRoot);
                 if (animated > 0)
                 {
                     EditorGUILayout.Space();
@@ -245,6 +244,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             try
             {
                 Directory.CreateDirectory(outputDirectory);
+                PrepareMerAnimationBlocks(root);
                 SynchronizeAnimationFileNames(root);
                 string json = RmeJsonExporter.Export(root);
                 string[] animationFiles = ExportAnimationFiles(root, outputDirectory);
@@ -261,6 +261,84 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorUtility.DisplayDialog("RME compile failed", exception.Message,
                     "Close");
             }
+        }
+
+        private static void PrepareMerAnimationBlocks(RmeCustomObjectRoot root)
+        {
+            NormalizeRootAnimator(root);
+            Animator[] animators = root.GetComponentsInChildren<Animator>(true)
+                .Where(animator => animator.transform != root.transform && !IsEditorPreview(animator.transform, root.transform))
+                .ToArray();
+            Animator[] missingControllers = animators.Where(animator => animator.runtimeAnimatorController == null).ToArray();
+            if (missingControllers.Length > 0)
+                throw new InvalidOperationException("Animator component(s) have no Runtime Animator Controller: " +
+                    string.Join(", ", missingControllers.Select(animator => animator.name)) +
+                    ". Assign a controller to each Animator before compiling, exactly as required by MER.");
+
+            UnityEngine.Animation[] legacyAnimations = root.GetComponentsInChildren<UnityEngine.Animation>(true)
+                .Where(animation => !IsEditorPreview(animation.transform, root.transform))
+                .ToArray();
+            if (legacyAnimations.Length > 0)
+                throw new InvalidOperationException("Legacy Animation component(s) are not MER-compatible: " +
+                    string.Join(", ", legacyAnimations.Select(animation => animation.name)) +
+                    ". Replace them with Animator components using Animator Controllers.");
+
+            foreach (Animator animator in animators)
+            {
+                RmeObjectBlock block = animator.GetComponent<RmeObjectBlock>();
+                if (block == null)
+                {
+                    block = Undo.AddComponent<RmeObjectBlock>(animator.gameObject);
+                    block.Kind = RmeBlockKind.Empty;
+                }
+                Undo.RecordObject(block, "Synchronize MER animator block");
+                block.AnimatorController = animator.runtimeAnimatorController;
+                EditorUtility.SetDirty(block);
+            }
+        }
+
+        private static void NormalizeRootAnimator(RmeCustomObjectRoot root)
+        {
+            Animator source = root.GetComponent<Animator>();
+            if (source == null) return;
+            if (source.runtimeAnimatorController == null)
+                throw new InvalidOperationException("The custom-object root has an Animator but no Runtime Animator Controller.");
+
+            Transform[] children = root.transform.Cast<Transform>().ToArray();
+            var animationRoot = new GameObject(GameObjectUtility.GetUniqueNameForSibling(root.transform, "AnimationRoot"));
+            Undo.RegisterCreatedObjectUndo(animationRoot, "Create MER animation root");
+            animationRoot.transform.SetParent(root.transform, false);
+            foreach (Transform child in children)
+                Undo.SetTransformParent(child, animationRoot.transform, "Move blocks below MER animation root");
+
+            RmeObjectBlock block = Undo.AddComponent<RmeObjectBlock>(animationRoot);
+            block.Kind = RmeBlockKind.Empty;
+            block.AnimatorController = source.runtimeAnimatorController;
+            Animator destination = Undo.AddComponent<Animator>(animationRoot);
+            destination.runtimeAnimatorController = source.runtimeAnimatorController;
+            destination.avatar = source.avatar;
+            destination.applyRootMotion = source.applyRootMotion;
+            destination.updateMode = source.updateMode;
+            destination.cullingMode = source.cullingMode;
+            Undo.DestroyObjectImmediate(source);
+            EditorUtility.SetDirty(animationRoot);
+        }
+
+        private static int AnimationControllerCount(RmeCustomObjectRoot root)
+        {
+            int animatorControllers = root.GetComponentsInChildren<Animator>(true).Count(animator =>
+                !IsEditorPreview(animator.transform, root.transform) && animator.runtimeAnimatorController != null);
+            int fieldOnlyControllers = root.GetComponentsInChildren<RmeObjectBlock>(true).Count(block =>
+                block.AnimatorController != null && (block.GetComponent<Animator>() == null ||
+                                                       block.GetComponent<Animator>().runtimeAnimatorController == null));
+            return animatorControllers + fieldOnlyControllers;
+        }
+
+        private static bool IsEditorPreview(Transform transform, Transform root)
+        {
+            for (Transform current = transform; current != null && current != root; current = current.parent)
+                if (current.name == RmePreviewFactory.PreviewName) return true;
+            return false;
         }
 
         private static void SynchronizeAnimationFileNames(RmeCustomObjectRoot root)

@@ -71,7 +71,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Animation", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("AnimatorController"), new GUIContent("Animator Controller"));
-                EditorGUILayout.HelpBox("Assign an Animator Controller here or on an Animator component on this block. Like MER, export writes that controller and its clips to a separate animation file beside the schematic JSON, using the controller name as the filename. Leave both empty when using procedural motion.", MessageType.None);
+                EditorGUILayout.HelpBox("Assign an Animator Controller here or use a normal Animator component anywhere below the custom-object root. Compile scans child transforms like MER, creates any required empty RME animation blocks, and writes controller-named files beside the JSON. Legacy Animation components are not supported.", MessageType.None);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionOffset"), new GUIContent("Move Offset"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionRotation"), new GUIContent("Rotate By"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("MotionDuration"), new GUIContent("Motion Duration"));
