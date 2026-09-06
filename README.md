@@ -8,7 +8,7 @@ This repository is also a Unity project. Install **Unity 2021.3.17f1** in Unity 
 
 If Unity Hub displays “Editor version not installed,” use its **Install Editor** button for `2021.3.17f1`. No platform build-support module is required just to author/export objects. Unity creates `Library`, `Logs`, and other ignored local folders during the first import.
 
-After scripts compile, the **RME Builder** window opens automatically and creates a `NewCustomObject` root. Reopen it any time from **RME Custom Objects → Open Builder**. Select the root or one of its children, add primitives or SCP:SL prefabs, arrange and nest them normally in the Scene, edit block properties in the Inspector, and click **Export Selected Custom Object**.
+After scripts compile, the **RME Builder** window opens automatically and creates a `NewCustomObject` root. Reopen it any time from **RME Custom Objects → Open Builder**. Select the root or one of its children, add primitives or SCP:SL prefabs, arrange and nest them normally in the Scene, edit block properties in the Inspector, and click **Compile Selected Custom Object**.
 
 Use **Import JSON for Editing** in the builder—or **RME Custom Objects → Import JSON for Editing**—to reconstruct an exported custom-object JSON as a new editable Unity hierarchy. The importer restores parent relationships, local transforms, block types, supported properties, primitive flags, text, lights, custom pickups, and prefab previews. Sidecar rigidbody, teleport, and animator files remain separate and are not imported.
 
@@ -36,7 +36,7 @@ The required visual dependencies from `SCPSL 14.1 - Rooms.unitypackage` are incl
 
 ## Install and use
 
-1. Copy a completed `<name>.json` (plus optional `<name>-Rigidbodies.json`, `<name>-Teleports.json`, and separate animation files) into the server's RME `CustomObjects/<name>/` directory.
+1. Compile the object, then copy its complete generated `<name>/` folder (containing `<name>.json` and any controller-named animation files) into the server's RME `CustomObjects/` directory.
 2. In an RME map, add a custom-object reference whose `Prefab` is `<name>`.
 3. Run `python3 tools/validate.py path/to/<name>.json` before handing the object to a server owner.
 4. Use `rme prefabs` in-game to obtain exact names for block type `12`.
@@ -70,7 +70,7 @@ Existing ProjectMER block types remain compatible. RME extensions are generic pr
 
 Primitive blocks can move without a custom Unity AssetBundle: set **Move Offset**, optional **Rotate By**, and **Motion Duration**. PingPong travels out and back; Loop restarts at the initial transform. This is server-driven, so moving collidable primitives retain their authoritative collider. For full Unity animation, assign an **Animator Controller** in the RME block Inspector or to an **Animator** component on that block. Like MER, export writes the controller and its clips as a separate server-platform animation file beside the JSON, named exactly after the controller, and displays every output path. Blocks that share a controller share its animation file. Do not combine the two motion methods on one primitive.
 
-To author a controller animation, create an Animator Controller asset in Unity, add clips that animate the selected primitive's transform, and assign it in the primitive Inspector. Give controllers safe, unique names. In the builder select the server platform and export the custom object. The completion dialog gives the schematic JSON and separate animation-file locations; copy every listed file into the same server folder.
+To author a controller animation, create an Animator Controller asset in Unity, add clips that animate the selected primitive's transform, and assign it in the primitive Inspector or its Animator component. Give controllers safe, unique names and set Unity's active build target to the platform used for SCP:SL. Compile the custom object, then copy the complete generated folder to the server.
 
 Positions, Euler rotations, scales, parent IDs, rigidbodies, and animator names are serialized unchanged. The root ID is a virtual map-placement anchor and must not also be used as a visible block.
 
