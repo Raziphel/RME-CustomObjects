@@ -430,9 +430,21 @@ namespace RazisRealm.RmeCustomObjects.Editor
                     throw new InvalidOperationException($"Unity's AssetBundle pipeline did not produce animation file '{animationName}' from '{controllerPath}' with {controller.animationClips.Length} clip(s) for {EditorUserBuildSettings.activeBuildTarget}. Check the immediately preceding Unity Console error.");
 
                 File.Copy(stagingPath, outputPath, true);
-                if (!BuildPipeline.GetCRCForAssetBundle(outputPath, out uint crc))
-                    throw new InvalidOperationException($"Animation file '{animationName}' was produced but failed Unity's CRC validation.");
-                Debug.Log($"[RME Custom Objects] Built animation '{animationName}' ({new FileInfo(outputPath).Length:N0} bytes, CRC {crc}) for {EditorUserBuildSettings.activeBuildTarget}.");
+                AssetBundle verificationBundle = null;
+                try
+                {
+                    verificationBundle = AssetBundle.LoadFromFile(outputPath);
+                    RuntimeAnimatorController[] exportedControllers = verificationBundle == null
+                        ? Array.Empty<RuntimeAnimatorController>()
+                        : verificationBundle.LoadAllAssets<RuntimeAnimatorController>();
+                    if (verificationBundle == null || exportedControllers.Length == 0)
+                        throw new InvalidOperationException($"Animation file '{animationName}' was produced but Unity could not load a Runtime Animator Controller from it.");
+                }
+                finally
+                {
+                    if (verificationBundle != null) verificationBundle.Unload(false);
+                }
+                Debug.Log($"[RME Custom Objects] Built and loaded animation '{animationName}' ({new FileInfo(outputPath).Length:N0} bytes) for {EditorUserBuildSettings.activeBuildTarget}.");
             }
             finally
             {
