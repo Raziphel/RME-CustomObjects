@@ -397,19 +397,47 @@ namespace RazisRealm.RmeCustomObjects.Editor
                 if (string.IsNullOrWhiteSpace(controllerPath))
                     throw new InvalidOperationException($"Animator Bundle '{group.Key}' references a controller outside this Unity project.");
                 string outputPath = Path.Combine(outputDirectory, group.Key);
-                BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression |
-                                                  BuildAssetBundleOptions.ForceRebuildAssetBundle |
-                                                  BuildAssetBundleOptions.StrictMode;
-#pragma warning disable 618
-                bool built = BuildPipeline.BuildAssetBundle(controllers[0], controllers[0].animationClips,
-                    outputPath, options, EditorUserBuildSettings.activeBuildTarget);
-#pragma warning restore 618
-                if (!built || !File.Exists(outputPath) || new FileInfo(outputPath).Length == 0 ||
-                    !BuildPipeline.GetCRCForAssetBundle(outputPath, out _))
-                    throw new InvalidOperationException($"Unity could not build animation file '{group.Key}'. Check the Console for the specific import or controller error.");
+                BuildAnimationFile(controllers[0], controllerPath, outputPath, group.Key);
                 outputPaths.Add(outputPath);
             }
             return outputPaths.ToArray();
+        }
+
+        private static void BuildAnimationFile(RuntimeAnimatorController controller, string controllerPath,
+            string outputPath, string animationName)
+        {
+            foreach (AnimationClip clip in controller.animationClips)
+                if (string.IsNullOrWhiteSpace(AssetDatabase.GetAssetPath(clip)))
+                    throw new InvalidOperationException($"Animation clip '{clip.name}' in '{animationName}' is not a saved Unity project asset.");
+
+            string stagingDirectory = FileUtil.GetUniqueTempPathInProject();
+            string stagingBundleName = "rme-animation-" + Guid.NewGuid().ToString("N");
+            try
+            {
+                Directory.CreateDirectory(stagingDirectory);
+                var build = new AssetBundleBuild
+                {
+                    assetBundleName = stagingBundleName,
+                    assetNames = new[] { controllerPath }
+                };
+                BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression |
+                                                  BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                                  BuildAssetBundleOptions.StrictMode;
+                AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(stagingDirectory, new[] { build },
+                    options, EditorUserBuildSettings.activeBuildTarget);
+                string stagingPath = Path.Combine(stagingDirectory, stagingBundleName);
+                if (manifest == null || !File.Exists(stagingPath) || new FileInfo(stagingPath).Length == 0)
+                    throw new InvalidOperationException($"Unity's AssetBundle pipeline did not produce animation file '{animationName}' from '{controllerPath}' with {controller.animationClips.Length} clip(s) for {EditorUserBuildSettings.activeBuildTarget}. Check the immediately preceding Unity Console error.");
+
+                File.Copy(stagingPath, outputPath, true);
+                if (!BuildPipeline.GetCRCForAssetBundle(outputPath, out uint crc))
+                    throw new InvalidOperationException($"Animation file '{animationName}' was produced but failed Unity's CRC validation.");
+                Debug.Log($"[RME Custom Objects] Built animation '{animationName}' ({new FileInfo(outputPath).Length:N0} bytes, CRC {crc}) for {EditorUserBuildSettings.activeBuildTarget}.");
+            }
+            finally
+            {
+                FileUtil.DeleteFileOrDirectory(stagingDirectory);
+            }
         }
 
         private static void ValidateSelected()
