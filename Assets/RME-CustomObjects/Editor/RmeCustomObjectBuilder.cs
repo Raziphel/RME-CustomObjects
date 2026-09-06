@@ -25,7 +25,6 @@ namespace RazisRealm.RmeCustomObjects.Editor
         };
 
         private PrimitiveType _primitive = PrimitiveType.Cube;
-        private static BuildTarget _animationBuildTarget = BuildTarget.StandaloneLinux64;
         private string _search = "";
         private Vector2 _prefabScroll;
 
@@ -82,13 +81,12 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (activeRoot != null)
             {
                 int animated = activeRoot.GetComponentsInChildren<RmeObjectBlock>(true)
-                    .Count(block => block.AnimatorController != null);
+                    .Count(block => ResolveAnimatorController(block) != null);
                 if (animated > 0)
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Animation Export", EditorStyles.boldLabel);
-                    _animationBuildTarget = (BuildTarget)EditorGUILayout.EnumPopup("Server Platform", _animationBuildTarget);
-                    EditorGUILayout.HelpBox($"Export will write {animated} configured Animator Controller(s) as separate MER-compatible animation files beside the JSON for {_animationBuildTarget}.", MessageType.Info);
+                    EditorGUILayout.HelpBox($"Compile will write {animated} Animator Controller(s) as MER-compatible animation files for Unity's active build target ({EditorUserBuildSettings.activeBuildTarget}).", MessageType.Info);
                 }
             }
 
@@ -161,7 +159,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             using (new EditorGUI.DisabledScope(FindRoot() == null))
             {
                 if (GUILayout.Button("Validate Selected Custom Object")) ValidateSelected();
-                if (GUILayout.Button("Export Selected Custom Object", GUILayout.Height(32))) ExportSelected();
+                if (GUILayout.Button("Compile Selected Custom Object", GUILayout.Height(32))) ExportSelected();
             }
         }
 
@@ -240,24 +238,27 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (root == null) return;
             string safeName = string.Concat((root.ObjectName ?? "CustomObject").Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_'));
             if (string.IsNullOrEmpty(safeName)) safeName = "CustomObject";
-            string path = EditorUtility.SaveFilePanel("Export RME Custom Object", "", safeName + ".json", "json");
-            if (string.IsNullOrEmpty(path)) return;
+            string parentDirectory = EditorUtility.OpenFolderPanel("Choose RME compiled-object output folder", "", "");
+            if (string.IsNullOrEmpty(parentDirectory)) return;
+            string outputDirectory = Path.Combine(parentDirectory, safeName);
+            string path = Path.Combine(outputDirectory, safeName + ".json");
             try
             {
+                Directory.CreateDirectory(outputDirectory);
                 SynchronizeAnimationFileNames(root);
                 string json = RmeJsonExporter.Export(root);
-                string[] animationFiles = ExportAnimationFiles(root, Path.GetDirectoryName(path));
+                string[] animationFiles = ExportAnimationFiles(root, outputDirectory);
                 File.WriteAllText(path, json, new UTF8Encoding(false));
-                EditorUtility.RevealInFinder(path);
+                EditorUtility.RevealInFinder(outputDirectory);
                 string animationList = animationFiles.Length == 0 ? "No animation files" : string.Join("\n", animationFiles);
-                EditorUtility.DisplayDialog("RME Custom Object exported",
-                    $"Schematic JSON:\n{path}\n\nSeparate animation files:\n{animationList}\n\nCopy the JSON and every listed animation file into the same server custom-object folder, run 'rme custom reload', then place/reference '{safeName}' in the RME map.", "Done");
-                Debug.Log($"[RME Custom Objects] Exported {root.ObjectName} to {path}");
+                EditorUtility.DisplayDialog("RME Custom Object compiled",
+                    $"Compiled folder:\n{outputDirectory}\n\nSchematic JSON:\n{path}\n\nAnimation files:\n{animationList}\n\nCopy the complete '{safeName}' folder into the server's CustomObjects folder, then run 'rme custom reload'.", "Done");
+                Debug.Log($"[RME Custom Objects] Compiled {root.ObjectName} to {outputDirectory}");
             }
             catch (Exception exception)
             {
-                Debug.LogError("[RME Custom Objects] Export failed: " + exception);
-                EditorUtility.DisplayDialog("RME export failed", exception.Message,
+                Debug.LogError("[RME Custom Objects] Compile failed: " + exception);
+                EditorUtility.DisplayDialog("RME compile failed", exception.Message,
                     "Close");
             }
         }
@@ -265,19 +266,39 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private static void SynchronizeAnimationFileNames(RmeCustomObjectRoot root)
         {
             foreach (RmeObjectBlock block in root.GetComponentsInChildren<RmeObjectBlock>(true)
-                         .Where(value => value.AnimatorController != null))
+                         .Where(value => ResolveAnimatorController(value) != null))
             {
-                string controllerPath = AssetDatabase.GetAssetPath(block.AnimatorController);
+                RuntimeAnimatorController controller = ResolveAnimatorController(block);
+                Animator animator = block.GetComponent<Animator>();
+                if (animator == null)
+                {
+                    animator = Undo.AddComponent<Animator>(block.gameObject);
+                    animator.runtimeAnimatorController = controller;
+                }
+                if (block.AnimatorController != controller)
+                {
+                    Undo.RecordObject(block, "Assign RME animator controller");
+                    block.AnimatorController = controller;
+                }
+                string controllerPath = AssetDatabase.GetAssetPath(controller);
                 if (string.IsNullOrWhiteSpace(controllerPath))
                     throw new InvalidOperationException($"Block '{block.name}' references an Animator Controller outside this Unity project.");
-                string name = block.AnimatorController.name.Trim();
+                string name = controller.name.Trim();
                 if (string.IsNullOrEmpty(name) || name.Length > 100 || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
                     name.Contains("..") || name.Contains("/") || name.Contains("\\"))
-                    throw new InvalidOperationException($"Animator Controller '{block.AnimatorController.name}' must have a safe MER animation filename.");
+                    throw new InvalidOperationException($"Animator Controller '{controller.name}' must have a safe MER animation filename.");
                 Undo.RecordObject(block, "Assign RME animator bundle name");
                 block.AnimatorName = name;
                 EditorUtility.SetDirty(block);
             }
+        }
+
+        private static RuntimeAnimatorController ResolveAnimatorController(RmeObjectBlock block)
+        {
+            Animator animator = block.GetComponent<Animator>();
+            if (animator != null && animator.runtimeAnimatorController != null)
+                return animator.runtimeAnimatorController;
+            return block.AnimatorController;
         }
 
         private static string[] ExportAnimationFiles(RmeCustomObjectRoot root, string outputDirectory)
@@ -303,9 +324,10 @@ namespace RazisRealm.RmeCustomObjects.Editor
                                                   BuildAssetBundleOptions.StrictMode;
 #pragma warning disable 618
                 bool built = BuildPipeline.BuildAssetBundle(controllers[0], controllers[0].animationClips,
-                    outputPath, options, _animationBuildTarget);
+                    outputPath, options, EditorUserBuildSettings.activeBuildTarget);
 #pragma warning restore 618
-                if (!built)
+                if (!built || !File.Exists(outputPath) || new FileInfo(outputPath).Length == 0 ||
+                    !BuildPipeline.GetCRCForAssetBundle(outputPath, out _))
                     throw new InvalidOperationException($"Unity could not build animation file '{group.Key}'. Check the Console for the specific import or controller error.");
                 outputPaths.Add(outputPath);
             }
