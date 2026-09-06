@@ -82,7 +82,7 @@ namespace RazisRealm.RmeCustomObjects.Editor
             if (activeRoot != null)
             {
                 int animated = activeRoot.GetComponentsInChildren<RmeObjectBlock>(true)
-                    .Count(block => block.AnimatorController != null);
+                    .Count(block => ResolveAnimatorController(block) != null);
                 if (animated > 0)
                 {
                     EditorGUILayout.Space();
@@ -265,19 +265,32 @@ namespace RazisRealm.RmeCustomObjects.Editor
         private static void SynchronizeAnimationFileNames(RmeCustomObjectRoot root)
         {
             foreach (RmeObjectBlock block in root.GetComponentsInChildren<RmeObjectBlock>(true)
-                         .Where(value => value.AnimatorController != null))
+                         .Where(value => ResolveAnimatorController(value) != null))
             {
-                string controllerPath = AssetDatabase.GetAssetPath(block.AnimatorController);
+                RuntimeAnimatorController controller = ResolveAnimatorController(block);
+                if (block.AnimatorController != controller)
+                {
+                    Undo.RecordObject(block, "Assign RME animator controller");
+                    block.AnimatorController = controller;
+                }
+                string controllerPath = AssetDatabase.GetAssetPath(controller);
                 if (string.IsNullOrWhiteSpace(controllerPath))
                     throw new InvalidOperationException($"Block '{block.name}' references an Animator Controller outside this Unity project.");
-                string name = block.AnimatorController.name.Trim();
+                string name = controller.name.Trim();
                 if (string.IsNullOrEmpty(name) || name.Length > 100 || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
                     name.Contains("..") || name.Contains("/") || name.Contains("\\"))
-                    throw new InvalidOperationException($"Animator Controller '{block.AnimatorController.name}' must have a safe MER animation filename.");
+                    throw new InvalidOperationException($"Animator Controller '{controller.name}' must have a safe MER animation filename.");
                 Undo.RecordObject(block, "Assign RME animator bundle name");
                 block.AnimatorName = name;
                 EditorUtility.SetDirty(block);
             }
+        }
+
+        private static RuntimeAnimatorController ResolveAnimatorController(RmeObjectBlock block)
+        {
+            if (block.AnimatorController != null) return block.AnimatorController;
+            Animator animator = block.GetComponent<Animator>();
+            return animator == null ? null : animator.runtimeAnimatorController;
         }
 
         private static string[] ExportAnimationFiles(RmeCustomObjectRoot root, string outputDirectory)
